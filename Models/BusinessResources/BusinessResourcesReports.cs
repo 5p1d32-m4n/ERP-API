@@ -4,7 +4,7 @@ using OfficeOpenXml.Style;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 
-namespace STG_ERP.Models.BusinessResources
+namespace ERP_API.Models.BusinessResources
 
 {
     public  class BusinessResourcesReports

@@ -2,9 +2,9 @@
 using OfficeOpenXml.Style;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
-using STG_ERP.Models.Notifications;
+using ERP_API.Models.Notifications;
 
-namespace STG_ERP.Models.Auth
+namespace ERP_API.Models.Auth
 {
 	public class NotificationsReports
 	{

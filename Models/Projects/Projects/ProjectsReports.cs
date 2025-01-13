@@ -4,7 +4,7 @@ using OfficeOpenXml.Style;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 
-namespace STG_ERP.Models.Projects.Projects
+namespace ERP_API.Models.Projects.Projects
 
 {
     public  class ProjectsReports

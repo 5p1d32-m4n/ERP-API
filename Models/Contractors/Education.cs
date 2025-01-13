@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Xunit.Sdk;
 
-namespace STG_ERP.Models.Contractors
+namespace ERP_API.Models.Contractors
 {
 	public class cEducation
 	{

@@ -2,9 +2,9 @@
 using OfficeOpenXml;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
-using STG_ERP.Models.BusinessResources;
+using ERP_API.Models.BusinessResources;
 
-namespace STG_ERP.Models.Finance
+namespace ERP_API.Models.Finance
 {
 	public class URReport
 	{

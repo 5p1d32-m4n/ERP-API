@@ -1,7 +1,7 @@
 
-using STG_ERP.Services;
+using ERP_API.Services;
 
-namespace STG_ERP.Models.Home
+namespace ERP_API.Models.Home
 {
 	public class HomeCounters
 	{

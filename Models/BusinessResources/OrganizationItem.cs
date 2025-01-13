@@ -1,4 +1,4 @@
-namespace STG_ERP.Models.BusinessResources{
+namespace ERP_API.Models.BusinessResources{
     public class OrganizationItem{
         public string id { get; set; }
         public string title { get; set; }

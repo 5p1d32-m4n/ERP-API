@@ -1,7 +1,7 @@
-﻿using STG_ERP.Models.Projects.Projects;
-using STG_ERP.Models.Resources;
+﻿using ERP_API.Models.Projects.Projects;
+using ERP_API.Models.Resources;
 
-namespace STG_ERP.Models.Timesheet
+namespace ERP_API.Models.Timesheet
 {
     public class PayCodeViewModel
     {

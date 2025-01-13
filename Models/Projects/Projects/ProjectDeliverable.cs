@@ -1,5 +1,5 @@
 
-namespace STG_ERP.Models.Projects.Projects
+namespace ERP_API.Models.Projects.Projects
 {
     public class ProjectDeliverable
     {

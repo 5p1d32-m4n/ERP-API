@@ -1,4 +1,4 @@
-namespace STG_ERP.Models.Helpers{
+namespace ERP_API.Models.Helpers{
     public class AuditTrail{
         public int Id { get; set; }
         public string Module { get; set; }

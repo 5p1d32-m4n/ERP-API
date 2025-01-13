@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace STG_ERP.Models.Timesheet
+namespace ERP_API.Models.Timesheet
 {
     public class TimesheetViewHomeModel
     {

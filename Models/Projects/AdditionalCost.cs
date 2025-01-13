@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace STG_ERP.Models.Projects
+namespace ERP_API.Models.Projects
 {
     public class AdditionalCost
     {

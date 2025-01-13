@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace STG_ERP.Models.Contractors
+namespace ERP_API.Models.Contractors
 {
 	public class Profession
 	{

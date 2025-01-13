@@ -1,8 +1,8 @@
-﻿using STG_ERP.Models.Resources;
-using STG_ERP.Models.Timesheet;
-using STG_ERP.Models.BusinessResources;
+﻿using ERP_API.Models.Resources;
+using ERP_API.Models.Timesheet;
+using ERP_API.Models.BusinessResources;
 
-namespace STG_ERP.Models.Auth
+namespace ERP_API.Models.Auth
 {
     public class ProfileViewModel
     {

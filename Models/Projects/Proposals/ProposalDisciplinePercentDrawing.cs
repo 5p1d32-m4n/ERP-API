@@ -1,4 +1,4 @@
-﻿namespace STG_ERP.Models.Projects.Proposals
+﻿namespace ERP_API.Models.Projects.Proposals
 {
 	public class ProposalDisciplinePercentDrawing
 	{

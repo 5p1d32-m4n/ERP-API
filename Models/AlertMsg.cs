@@ -1,4 +1,4 @@
-﻿namespace STG_ERP.Models
+﻿namespace ERP_API.Models
 {
     public class AlertMsg
     {

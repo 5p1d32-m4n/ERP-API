@@ -1,9 +1,9 @@
-﻿using STG_ERP.Models.Assets;
-using STG_ERP.Models.Resources;
-using STG_ERP.Models.BusinessResources;
+﻿using ERP_API.Models.Assets;
+using ERP_API.Models.Resources;
+using ERP_API.Models.BusinessResources;
 using System.ComponentModel.DataAnnotations;
 
-namespace STG_ERP.Models.Auth
+namespace ERP_API.Models.Auth
 {
 	public class ApplicationUserCreateEditViewModel
 	{

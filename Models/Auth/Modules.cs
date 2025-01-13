@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace STG_ERP.Models.Auth
+namespace ERP_API.Models.Auth
 {
 	public class Modules
 	{

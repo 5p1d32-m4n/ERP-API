@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
-namespace STG_ERP.Models.Resources 
+namespace ERP_API.Models.Resources 
 {
 	public class Resource
 	{

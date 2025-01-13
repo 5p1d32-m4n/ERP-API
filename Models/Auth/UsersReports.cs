@@ -3,14 +3,14 @@ using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
-using STG_ERP.Models.Resources;
-using STG_ERP.Models.BusinessResources;
-using STG_ERP.Models.Helpers;
-using STG_ERP.Services;
+using ERP_API.Models.Resources;
+using ERP_API.Models.BusinessResources;
+using ERP_API.Models.Helpers;
+using ERP_API.Services;
 using System.Data;
 using System.Reflection;
 
-namespace STG_ERP.Models.Auth
+namespace ERP_API.Models.Auth
 
 {
     public class UsersReports

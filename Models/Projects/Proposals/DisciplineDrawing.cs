@@ -1,6 +1,6 @@
-using STG_ERP.Models.Projects.Proposals;
+using ERP_API.Models.Projects.Proposals;
 
-namespace STG_ERP.Models.Projects.Proposals
+namespace ERP_API.Models.Projects.Proposals
 {
     public class DisciplineDrawings
     {

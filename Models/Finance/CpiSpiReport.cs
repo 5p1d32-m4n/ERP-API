@@ -2,10 +2,10 @@
 using OfficeOpenXml;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
-using STG_ERP.Models.BusinessResources;
-using STG_ERP.Models.Projects.Projects;
+using ERP_API.Models.BusinessResources;
+using ERP_API.Models.Projects.Projects;
 
-namespace STG_ERP.Models.Finance
+namespace ERP_API.Models.Finance
 {
 	public class CpiSpiReport
 	{

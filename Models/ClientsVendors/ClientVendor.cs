@@ -1,10 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
-using STG_ERP.Models.Business;
+using ERP_API.Models.Business;
 using System.Text.Json.Serialization;
 
-namespace STG_ERP.Models.ClientsVendors
+namespace ERP_API.Models.ClientsVendors
 {
     public class ClientVendor
     {

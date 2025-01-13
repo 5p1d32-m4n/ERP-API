@@ -1,6 +1,6 @@
-﻿using STG_ERP.Models.Projects.Projects;
+﻿using ERP_API.Models.Projects.Projects;
 
-namespace STG_ERP.Models.Timesheet
+namespace ERP_API.Models.Timesheet
 {
     public class TimesheetPayCodeViewModel
     {

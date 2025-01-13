@@ -1,4 +1,4 @@
-namespace STG_ERP.Models.BusinessResources{
+namespace ERP_API.Models.BusinessResources{
     public class ResourceFileDocument{
         public int Id {get;set;}
         public int ResourceId {get;set;}

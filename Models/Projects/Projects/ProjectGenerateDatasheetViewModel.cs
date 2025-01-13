@@ -1,10 +1,10 @@
 using System.ComponentModel.DataAnnotations;
-using STG_ERP.Models.Business;
-using STG_ERP.Models.BusinessResources;
-using STG_ERP.Models.ClientsVendors;
-using STG_ERP.Models.Timesheet;
+using ERP_API.Models.Business;
+using ERP_API.Models.BusinessResources;
+using ERP_API.Models.ClientsVendors;
+using ERP_API.Models.Timesheet;
 
-namespace STG_ERP.Models.Projects.Projects
+namespace ERP_API.Models.Projects.Projects
 {
     public class ProjectGenerateDatasheetViewModel
     {

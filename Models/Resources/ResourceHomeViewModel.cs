@@ -1,6 +1,6 @@
-using STG_ERP.Models.Business;
+using ERP_API.Models.Business;
 
-namespace STG_ERP.Models.Resources
+namespace ERP_API.Models.Resources
 {
     public class ResourceHomeViewModel
     {

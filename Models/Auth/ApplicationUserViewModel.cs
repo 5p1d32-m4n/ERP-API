@@ -1,7 +1,7 @@
-﻿using STG_ERP.Models.Assets;
-using STG_ERP.Models.Business;
+﻿using ERP_API.Models.Assets;
+using ERP_API.Models.Business;
 
-namespace STG_ERP.Models.Auth
+namespace ERP_API.Models.Auth
 {
 	public class ApplicationUserViewModel
 	{

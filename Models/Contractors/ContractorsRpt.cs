@@ -6,7 +6,7 @@ using QuestPDF.Helpers;
 using System.Data.Common;
 using System.Drawing;
 
-namespace STG_ERP.Models.Contractors
+namespace ERP_API.Models.Contractors
 {
 	public class ContractorsRpts
 	{

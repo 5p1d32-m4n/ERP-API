@@ -1,7 +1,7 @@
 ﻿
-using STG_ERP.Models.Home;
+using ERP_API.Models.Home;
 
-namespace STG_ERP.Models
+namespace ERP_API.Models
 {
 	public class HomeViewModel
 	{

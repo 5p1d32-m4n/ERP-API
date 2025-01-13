@@ -3,10 +3,10 @@ using OfficeOpenXml.Style;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using System.Data;
-using STG_ERP.Models.Projects.Projects;
+using ERP_API.Models.Projects.Projects;
 using Microsoft.IdentityModel.Tokens;
 
-namespace STG_ERP.Models.Projects.Proposals
+namespace ERP_API.Models.Projects.Proposals
 {
     public class ProposalReports
     {
@@ -1763,7 +1763,7 @@ namespace STG_ERP.Models.Projects.Proposals
                                                             byte[] imageData = System.IO.File.ReadAllBytes(imagePath);
                                                             if (imageData != null && imageData.Length > 0)
                                                             {
-                                                                byte[] circularImageData = STG_ERP.Utils.Helpers.CreateCircularImage(imageData);
+                                                                byte[] circularImageData = ERP_API.Utils.Helpers.CreateCircularImage(imageData);
                                                                 col.Item().Image(circularImageData);
                                                                 col.Item().AlignCenter().Text(teamMember.Resource.Fullname).FontSize(8).Bold().FontColor(dangerColor);
                                                                 col.Item().AlignCenter().Text(teamMember.Position).FontSize(7);

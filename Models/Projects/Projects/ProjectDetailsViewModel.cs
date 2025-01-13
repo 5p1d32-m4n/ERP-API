@@ -1,6 +1,6 @@
-using STG_ERP.Models.BusinessResources;
+using ERP_API.Models.BusinessResources;
 
-namespace STG_ERP.Models.Projects.Projects
+namespace ERP_API.Models.Projects.Projects
 {
     public class ProjectDetailsViewModel{
         public Project Project {get;set;}

@@ -1,6 +1,6 @@
-using STG_ERP.Models.Business;
+using ERP_API.Models.Business;
 
-namespace STG_ERP.Models.BusinessResources{
+namespace ERP_API.Models.BusinessResources{
     public class OrganizationViewModel{
         public List<Department> Departments { get; set; } = new List<Department>();
     }

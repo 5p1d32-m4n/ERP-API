@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using STG_ERP.Models.Business;
+using ERP_API.Models.Business;
 
-namespace STG_ERP.Models.Projects
+namespace ERP_API.Models.Projects
 {
     public class DesignDiscipline
     {

@@ -1,7 +1,7 @@
-﻿using STG_ERP.Models.Resources;
+﻿using ERP_API.Models.Resources;
 using System.ComponentModel.DataAnnotations;
 
-namespace STG_ERP.Models.Assets
+namespace ERP_API.Models.Assets
 {
     public class AssetsCheckoutViewModel
     {

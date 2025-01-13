@@ -1,6 +1,6 @@
-﻿using STG_ERP.Models.BusinessResources;
-using STG_ERP.Models.Projects.Projects;
-namespace STG_ERP.Models.Timesheet;
+﻿using ERP_API.Models.BusinessResources;
+using ERP_API.Models.Projects.Projects;
+namespace ERP_API.Models.Timesheet;
 
 public class TimesheetCreateEditViewModel : Timesheet
 {

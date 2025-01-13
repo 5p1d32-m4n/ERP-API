@@ -1,5 +1,5 @@
 ﻿
-namespace STG_ERP.Models.Notifications
+namespace ERP_API.Models.Notifications
 {
 	public class NotificationsViewModel
 	{

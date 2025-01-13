@@ -1,4 +1,4 @@
-namespace STG_ERP.Models.Assets{
+namespace ERP_API.Models.Assets{
     public class AssetHomeViewModel{
         public int ItemsCount { get; set; }
         public int InventoryCount { get; set; }

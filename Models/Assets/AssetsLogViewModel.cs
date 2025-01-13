@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace STG_ERP.Models.Assets
+namespace ERP_API.Models.Assets
 {
     public class AssetsLogViewModel
     {

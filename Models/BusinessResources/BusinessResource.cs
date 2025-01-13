@@ -1,9 +1,9 @@
-﻿using STG_ERP.Models.Business;
-using STG_ERP.Models.Projects;
-using STG_ERP.Models.Timesheet;
+﻿using ERP_API.Models.Business;
+using ERP_API.Models.Projects;
+using ERP_API.Models.Timesheet;
 using System.ComponentModel.DataAnnotations;
 
-namespace STG_ERP.Models.BusinessResources
+namespace ERP_API.Models.BusinessResources
 {
 	public class BusinessResource
 	{

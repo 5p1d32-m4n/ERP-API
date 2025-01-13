@@ -1,6 +1,6 @@
-﻿using STG_ERP.Models.Business;
+﻿using ERP_API.Models.Business;
 
-namespace STG_ERP.Models.Projects.Proposals
+namespace ERP_API.Models.Projects.Proposals
 {
 	public class SubDisciplinePercent
 	{

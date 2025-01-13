@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace STG_ERP.Models.Auth
+namespace ERP_API.Models.Auth
 {
     public class ForgotPasswordViewModel
     {

@@ -1,4 +1,4 @@
-﻿namespace STG_ERP.Models.Business
+﻿namespace ERP_API.Models.Business
 {
     public class BusinessViewModel
 	{

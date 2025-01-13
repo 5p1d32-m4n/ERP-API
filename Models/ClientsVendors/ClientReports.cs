@@ -3,7 +3,7 @@ using OfficeOpenXml;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 
-namespace STG_ERP.Models.ClientsVendors
+namespace ERP_API.Models.ClientsVendors
 {
 	public class ClientReports
 	{

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace STG_ERP.Models.Business
+namespace ERP_API.Models.Business
 {
 	public class Business
 	{

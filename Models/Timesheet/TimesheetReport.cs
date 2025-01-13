@@ -2,12 +2,12 @@
 using OfficeOpenXml;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
-using STG_ERP.Models.BusinessResources;
+using ERP_API.Models.BusinessResources;
 using SixLabors.ImageSharp; 
 using SixLabors.ImageSharp.Formats.Jpeg; 
 using SixLabors.ImageSharp.Processing;
 
-namespace STG_ERP.Models.Timesheet
+namespace ERP_API.Models.Timesheet
 {
 	public class TimesheetReport
 	{

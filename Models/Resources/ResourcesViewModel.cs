@@ -1,4 +1,4 @@
-﻿namespace STG_ERP.Models.Resources
+﻿namespace ERP_API.Models.Resources
 {
 	public class ResourcesViewModel
 	{

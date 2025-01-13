@@ -1,8 +1,8 @@
-﻿using STG_ERP.Models.Business;
-using STG_ERP.Models.BusinessResources;
-using STG_ERP.Models.Auth;
+﻿using ERP_API.Models.Business;
+using ERP_API.Models.BusinessResources;
+using ERP_API.Models.Auth;
 
-namespace STG_ERP.Models.Timesheet;
+namespace ERP_API.Models.Timesheet;
 public class Timesheet
 {
     public int Id { get; set; }

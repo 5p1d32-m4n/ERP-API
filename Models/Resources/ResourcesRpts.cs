@@ -3,7 +3,7 @@ using OfficeOpenXml.Style;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 
-namespace STG_ERP.Models.Resources
+namespace ERP_API.Models.Resources
 {
 	public class ResourcesRpts
 	{

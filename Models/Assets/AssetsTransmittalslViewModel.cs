@@ -1,4 +1,4 @@
-﻿namespace STG_ERP.Models.Assets
+﻿namespace ERP_API.Models.Assets
 {
 	public class AssetsTransmittalslViewModel
 	{

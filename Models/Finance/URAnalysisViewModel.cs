@@ -1,6 +1,6 @@
-using STG_ERP.Models.BusinessResources;
+using ERP_API.Models.BusinessResources;
 
-namespace STG_ERP.Models.Finance
+namespace ERP_API.Models.Finance
 {
 	public class URReportViewModel{
         public List<BusinessResource> AllResources { get; set; } = new List<BusinessResource>();

@@ -1,4 +1,4 @@
-namespace STG_ERP.Models.Projects{
+namespace ERP_API.Models.Projects{
     public class ServiceDeliverable{
         public int Id {get;set;}
         public int CategoryId { get; set; }

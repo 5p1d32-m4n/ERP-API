@@ -1,7 +1,7 @@
 
-using STG_ERP.Models.Business;
+using ERP_API.Models.Business;
 
-namespace STG_ERP.Models.ClientsVendors
+namespace ERP_API.Models.ClientsVendors
 {
     public class ClientCreateEditViewModel
     {
