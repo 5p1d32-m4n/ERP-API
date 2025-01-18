@@ -7,6 +7,7 @@
         public int ProposalId { get; set; }
         public decimal Percentage { get; set; }
         public decimal Cost { get; set; }
+        public Proposal Proposal { get; set; }
 
         //IEnumerable<DepartmentEffort>? DepartmentEfforts { get; set; }
         //IEnumerable<Deliverable> Deliverables { get; set; }
@@ -16,5 +17,7 @@
         public decimal? PercentageCost(decimal? ProposalCost) {
             return ProposalCost.HasValue ? Percentage * ProposalCost : null;
         }
+
+        public ServiceDeliverable ServiceDeliverable { get; set; }
     }
 }

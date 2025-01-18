@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using ERP_API.Models.Projects.Proposals;
 
 namespace ERP_API.Models.Projects
 {
@@ -18,6 +19,7 @@ namespace ERP_API.Models.Projects
         
         public int ProposalId { get; set; }
         public int ProjectId { get; set; }
+        public Proposal Proposal { get; set; }
 
         public decimal CalcTotalCost()
 		{

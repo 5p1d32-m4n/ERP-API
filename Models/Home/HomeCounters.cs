@@ -1,6 +1,3 @@
-
-using ERP_API.Services;
-
 namespace ERP_API.Models.Home
 {
 	public class HomeCounters

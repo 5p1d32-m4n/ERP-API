@@ -3,6 +3,7 @@ using ERP_API.Models.BusinessResources;
 using ERP_API.Models.ClientsVendors;
 using ERP_API.Models.Projects.Projects;
 using System.ComponentModel.DataAnnotations;
+using ErpApi.Models.Projects.Proposals;
 
 namespace ERP_API.Models.Projects.Proposals
 {

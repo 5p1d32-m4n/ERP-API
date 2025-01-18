@@ -1,4 +1,6 @@
-﻿namespace ERP_API.Models.Projects.Proposals
+﻿using ERP_API.Models.Projects.Proposals;
+
+namespace ErpApi.Models.Projects.Proposals
 {
     public class ProposalStatus
     {
@@ -7,5 +9,8 @@
         public int ProposalId { get; set; }
         public int StatusId { get; set; }
         public DateTime DateChanged { get; set; }
+
+        public StatusOption StatusOption { get; set; }
+        public Proposal Proposal { get; set; }
     }
 }
