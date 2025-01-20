@@ -1,8 +1,7 @@
-using ERP_API.Models.Business;
-using ERP_API.Models.ClientsVendors;
-using ERP_API.Models.Projects;
-using ERP_API.Models.Projects.Projects;
-using ERP_API.Models.Projects.Proposals;
+using ErpApi.Models.Business;
+using ErpApi.Models.ClientsVendors;
+using ErpApi.Models.Projects;
+using ErpApi.Models.Projects.Projects;
 using ErpApi.Models.Projects.Proposals;
 
 namespace ErpApi.Interfaces;
@@ -29,7 +28,6 @@ public interface IProposalRepository
         Task<IEnumerable<AdditionalCost>> GetProposalAdditionalCostsAsync();
         Task<IEnumerable<ProjectDeliverable>> GetProposalDeliverablesAsync();
         Task<IEnumerable<Phase>> GetPhasesAsync();
-        Task<IEnumerable<DisciplinePercent>> GetDisciplinePercentsAsync();
         Task<IEnumerable<SubDisciplinePercent>> GetSubDisciplinePercentsAsync();
         Task<IEnumerable<BillingStyle>> GetBillingStylesAsync();
         Task<IEnumerable<ClientVendor>> GetClientsVendorsAsync();

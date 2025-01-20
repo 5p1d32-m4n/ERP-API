@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
-namespace ERP_API.Models.Auth
+namespace ErpApi.Models.Auth
 {
     public class ResetPasswordViewModel
     {

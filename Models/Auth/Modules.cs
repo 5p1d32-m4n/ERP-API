@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace ERP_API.Models.Auth
+namespace ErpApi.Models.Auth
 {
 	public class Modules
 	{

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ERP_API.Models.Projects.Projects
+namespace ErpApi.Models.Projects.Projects
 {
     public class ProjectAdditionalCost
     {

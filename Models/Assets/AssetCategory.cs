@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ERP_API.Models.Assets
+namespace ErpApi.Models.Assets
 {
     public class AssetCategory
     {

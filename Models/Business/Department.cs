@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ERP_API.Models.Business
+namespace ErpApi.Models.Business
 {
 	//Haz un rename de Departments a Department (Las clases y Modelos siempre van en singular)
     public class Department

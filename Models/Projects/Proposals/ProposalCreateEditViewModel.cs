@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
-using ERP_API.Models.Business;
-using ERP_API.Models.BusinessResources;
-using ERP_API.Models.ClientsVendors;
-using ERP_API.Models.Projects;
+using ErpApi.Models.Projects;
+using ErpApi.Models.Business;
+using ErpApi.Models.BusinessResources;
+using ErpApi.Models.ClientsVendors;
 
 
-namespace ERP_API.Models.Projects.Proposals
+namespace ErpApi.Models.Projects.Proposals
 {
     public class ProposalCreateEditViewModel
     {
@@ -68,8 +68,6 @@ namespace ERP_API.Models.Projects.Proposals
         public List<string> ActiveAssetNames { get; set; }
 
         public IEnumerable<Discipline> Disciplines { get; set; } = new List<Discipline>();
-        public DisciplinePercent DisciplinePercent { get; set; }
-        public List<DisciplinePercent> DisciplinePercents { get; set; } = new List<DisciplinePercent>();
 		public List<SubDisciplinePercent> SubDisciplinePercents { get; set; } = new List<SubDisciplinePercent>();
 
 		public IEnumerable<Discipline> AEDisciplines { get; set; } = new List<Discipline>();

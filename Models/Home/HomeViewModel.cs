@@ -1,7 +1,6 @@
-﻿
-using ERP_API.Models.Home;
+﻿using ErpApi.Models.Home;
 
-namespace ERP_API.Models
+namespace ErpApi.Models
 {
 	public class HomeViewModel
 	{

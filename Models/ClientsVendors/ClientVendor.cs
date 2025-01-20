@@ -1,10 +1,9 @@
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Mvc;
-using ERP_API.Models.Business;
-using System.Text.Json.Serialization;
+using ErpApi.Models.Business;
 
-namespace ERP_API.Models.ClientsVendors
+namespace ErpApi.Models.ClientsVendors
 {
     public class ClientVendor
     {
@@ -57,9 +56,9 @@ namespace ERP_API.Models.ClientsVendors
 
         public Town town { get; set; }
 
-		[JsonPropertyName("townName")]
-		public string Town { get; set; }
+		public string TownName { get; set; }
 
+		[NotMapped]
 		public IFormFile ImageFile { get; set; }
 
 		public string ImageName { get; set; }

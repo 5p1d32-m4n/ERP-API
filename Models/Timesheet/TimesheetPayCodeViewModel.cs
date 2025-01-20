@@ -1,6 +1,6 @@
-﻿using ERP_API.Models.Projects.Projects;
+﻿using ErpApi.Models.Projects.Projects;
 
-namespace ERP_API.Models.Timesheet
+namespace ErpApi.Models.Timesheet
 {
     public class TimesheetPayCodeViewModel
     {

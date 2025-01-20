@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace ERP_API.Models.Assets
+namespace ErpApi.Models.Assets
 {
     public class AssetsViewModel
     {

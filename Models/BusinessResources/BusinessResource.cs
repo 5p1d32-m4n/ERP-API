@@ -1,14 +1,16 @@
-﻿using ERP_API.Models.Business;
-using ERP_API.Models.Projects;
-using ERP_API.Models.Timesheet;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using ErpApi.Models.Business;
+using ErpApi.Models.Projects;
+using ErpApi.Models.Timesheet;
 
-namespace ERP_API.Models.BusinessResources
+namespace ErpApi.Models.BusinessResources
 {
 	public class BusinessResource
 	{
 		public int Id { get; set; }
 		public string ImageName { get; set; }
+		[NotMapped]
 		public IFormFile ImageFile { get; set; }
 
 		[Required(ErrorMessage = "This field is required")]
@@ -50,6 +52,7 @@ namespace ERP_API.Models.BusinessResources
 		public string PELicenseNumber { get; set; }
 		public DateTime? PELicExpiration { get; set; }
 		public string CIAPRMemberCardFileName { get; set; }
+		[NotMapped]
 		public IFormFile CIAPRMemberCardFile { get; set; }
 
 		//RA
@@ -58,11 +61,13 @@ namespace ERP_API.Models.BusinessResources
 		public string RALicenseNumber { get; set; }
 		public DateTime? RALicExpiration { get; set; }
 		public string CAAPMemberCardFileName { get; set; }
+		[NotMapped]
 		public IFormFile CAAPMemberCardFile { get; set; }
 
 		//Resume
 		public string ResumeFileName { get; set; }
 		
+		[NotMapped]
 		public IFormFile ResumeFile { get; set; }
 
 		//Documents

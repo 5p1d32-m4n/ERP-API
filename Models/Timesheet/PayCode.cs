@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ERP_API.Models.Timesheet
+namespace ErpApi.Models.Timesheet
 {
     public class PayCode
     {

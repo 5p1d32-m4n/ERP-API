@@ -1,4 +1,4 @@
-namespace ERP_API.Models.BusinessResources{
+namespace ErpApi.Models.BusinessResources{
     public class OrganizationItem{
         public string id { get; set; }
         public string title { get; set; }

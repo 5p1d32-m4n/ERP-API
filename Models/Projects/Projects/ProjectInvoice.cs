@@ -1,11 +1,12 @@
 
-namespace ERP_API.Models.Projects.Projects
+namespace ErpApi.Models.Projects.Projects
 {
     public class ProjectInvoice
     {
         public int Id { get; set; }
         
         public string InvoiceNumber { get; set; }
+        public Project Project { get; set; }
 
         public int ProjectId { get; set; }
 

@@ -1,7 +1,6 @@
+using ErpApi.Models.Business;
 
-using ERP_API.Models.Business;
-
-namespace ERP_API.Models.ClientsVendors
+namespace ErpApi.Models.ClientsVendors
 {
     public class ClientCreateEditViewModel
     {

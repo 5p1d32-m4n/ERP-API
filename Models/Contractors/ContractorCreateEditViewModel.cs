@@ -1,6 +1,6 @@
-﻿using ERP_API.Models.Business;
+﻿using ErpApi.Models.Business;
 
-namespace ERP_API.Models.Contractors
+namespace ErpApi.Models.Contractors
 {
 	public class ContractorCreateEditViewModel
 	{

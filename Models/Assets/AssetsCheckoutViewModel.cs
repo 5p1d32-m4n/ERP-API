@@ -1,7 +1,7 @@
-﻿using ERP_API.Models.Resources;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using ErpApi.Models.Resources;
 
-namespace ERP_API.Models.Assets
+namespace ErpApi.Models.Assets
 {
     public class AssetsCheckoutViewModel
     {

@@ -1,4 +1,4 @@
-namespace ERP_API.Models
+namespace ErpApi.Models
 {
     public class ErrorViewModel
     {

@@ -1,7 +1,7 @@
-﻿using ERP_API.Models.Assets;
-using ERP_API.Models.Business;
+﻿using ErpApi.Models.Assets;
+using ErpApi.Models.Business;
 
-namespace ERP_API.Models.Auth
+namespace ErpApi.Models.Auth
 {
     public class AccountHomeViewModel
     {

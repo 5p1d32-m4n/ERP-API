@@ -1,4 +1,4 @@
-namespace ERP_API.Models.Projects.Projects
+namespace ErpApi.Models.Projects.Projects
 {
     public class ProjectSubConsultant{
         public int Id {get; set;}

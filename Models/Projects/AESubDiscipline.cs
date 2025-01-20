@@ -1,4 +1,4 @@
-namespace ERP_API.Models.Projects
+namespace ErpApi.Models.Projects
 {
     public class AESubDiscipline{
         public int Id { get; set; }

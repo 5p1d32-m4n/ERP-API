@@ -1,9 +1,9 @@
-﻿using ERP_API.Models.Assets;
-using ERP_API.Models.Resources;
-using ERP_API.Models.BusinessResources;
+﻿using ErpApi.Models.Assets;
+using ErpApi.Models.Resources;
 using System.ComponentModel.DataAnnotations;
+using ErpApi.Models.BusinessResources;
 
-namespace ERP_API.Models.Auth
+namespace ErpApi.Models.Auth
 {
 	public class ApplicationUserCreateEditViewModel
 	{

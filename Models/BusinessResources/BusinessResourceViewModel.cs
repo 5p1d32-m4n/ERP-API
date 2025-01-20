@@ -1,6 +1,6 @@
-using ERP_API.Models.Business;
+using ErpApi.Models.Business;
 
-namespace ERP_API.Models.BusinessResources
+namespace ErpApi.Models.BusinessResources
 {
 	public class BusinessResourceViewModel
 	{

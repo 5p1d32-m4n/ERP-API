@@ -1,4 +1,4 @@
-﻿using ERP_API.Models.Projects.Proposals;
+﻿using ErpApi.Models.Projects.Proposals;
 
 namespace ErpApi.Models.Projects.Proposals
 {

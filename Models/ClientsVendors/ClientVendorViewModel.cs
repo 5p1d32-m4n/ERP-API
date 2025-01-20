@@ -1,6 +1,6 @@
-using ERP_API.Models.Business;
+using ErpApi.Models.Business;
 
-namespace ERP_API.Models.ClientsVendors
+namespace ErpApi.Models.ClientsVendors
 {
 	public class ClientVendorViewModel
 	{

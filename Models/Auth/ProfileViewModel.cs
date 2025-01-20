@@ -1,8 +1,8 @@
-﻿using ERP_API.Models.Resources;
-using ERP_API.Models.Timesheet;
-using ERP_API.Models.BusinessResources;
+﻿using ErpApi.Models.Resources;
+using ErpApi.Models.BusinessResources;
+using ErpApi.Models.Timesheet;
 
-namespace ERP_API.Models.Auth
+namespace ErpApi.Models.Auth
 {
     public class ProfileViewModel
     {

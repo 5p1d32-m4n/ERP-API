@@ -1,15 +1,15 @@
-using ERP_API.Models.Business;
-using ERP_API.Models.ClientsVendors;
-using ERP_API.Models.Projects;
-using ERP_API.Models.Projects.Projects;
-using ERP_API.Models.Projects.Proposals;
+using ErpApi.Models.Business;
+using ErpApi.Models.ClientsVendors;
+using ErpApi.Models.Projects;
+using ErpApi.Models.Projects.Projects;
 using ErpApi.Data;
+using ErpApi.Interfaces;
 using ErpApi.Models.Projects.Proposals;
 using Microsoft.EntityFrameworkCore;
 
 namespace ErpApi.Repository;
 
-public class ProposalRepository
+public class ProposalRepository : IProposalRepository
 {
     private readonly ProposalDbContext _context;
 
@@ -19,7 +19,15 @@ public class ProposalRepository
     }
     public async Task<IEnumerable<Proposal>> GetAllProposalsAsync()
         {
+            try
+            {
             return await _context.Proposals.ToListAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
         public async Task<Proposal> GetProposalByIdAsync(int id)
@@ -122,10 +130,6 @@ public class ProposalRepository
             return await _context.Phases.ToListAsync();
         }
 
-        public async Task<IEnumerable<DisciplinePercent>> GetDisciplinePercentsAsync()
-        {
-            return await _context.DisciplinePercents.ToListAsync();
-        }
 
         public async Task<IEnumerable<SubDisciplinePercent>> GetSubDisciplinePercentsAsync()
         {

@@ -1,6 +1,6 @@
-﻿using ERP_API.Models.BusinessResources;
+﻿using ErpApi.Models.BusinessResources;
 
-namespace ERP_API.Models.Timesheet
+namespace ErpApi.Models.Timesheet
 {
 	public class TimesheetResourceHourViewModel
 	{

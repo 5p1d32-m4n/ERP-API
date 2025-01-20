@@ -1,15 +1,17 @@
-﻿namespace ERP_API.Models.Projects.Proposals
+﻿using ErpApi.Models.Projects.Proposals;
+namespace ErpApi.Models.Projects.Proposals
 {
-	public class ProposalDisciplinePercentDrawing
-	{
+    public class ProposalDisciplinePercentDrawing
+    {
         public int Id { get; set; }
         public int DrawingId { get; set; } // from AEDrawings table.
-        public int ProposalDisciplinePercentId { get; set; }
-        public int? ProposalSubDisciplinePercentId { get; set; }
+        public SubDisciplinePercent SubDisciplinePercent { get; set; }
+
+        public int SubDisciplinePercentId { get; set; }
         public string DrawingCategory { get; set; }
         public string DrawingPageNumber { get; set; }
         public string DrawingDescription { get; set; }
         public decimal DrawingCost { get; set; }
-        public List<AEDrawing> DrawingOptions {get; set;} = new List<AEDrawing>();
+        public List<AEDrawing> DrawingOptions { get; set; } = new List<AEDrawing>();
     }
 }

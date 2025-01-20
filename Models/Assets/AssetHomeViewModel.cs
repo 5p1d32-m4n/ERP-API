@@ -1,4 +1,4 @@
-namespace ERP_API.Models.Assets{
+namespace ErpApi.Models.Assets{
     public class AssetHomeViewModel{
         public int ItemsCount { get; set; }
         public int InventoryCount { get; set; }

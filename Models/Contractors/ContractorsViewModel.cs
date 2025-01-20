@@ -1,4 +1,4 @@
-﻿namespace ERP_API.Models.Contractors
+﻿namespace ErpApi.Models.Contractors
 {
 	public class ContractorsViewModel
 	{

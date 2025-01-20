@@ -1,8 +1,8 @@
-﻿using ERP_API.Models.Business;
-using ERP_API.Models.BusinessResources;
-using ERP_API.Models.Auth;
+﻿using ErpApi.Models.Auth;
+using ErpApi.Models.Business;
+using ErpApi.Models.BusinessResources;
 
-namespace ERP_API.Models.Timesheet;
+namespace ErpApi.Models.Timesheet;
 public class Timesheet
 {
     public int Id { get; set; }

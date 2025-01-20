@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ERP_API.Models.Resources
+namespace ErpApi.Models.Resources
 {
 	public class Education
 	{

@@ -1,6 +1,6 @@
-using ERP_API.Models.BusinessResources;
+using ErpApi.Models.BusinessResources;
 
-namespace ERP_API.Models.Projects.Projects
+namespace ErpApi.Models.Projects.Projects
 {
     public class ProjectDetailsViewModel{
         public Project Project {get;set;}

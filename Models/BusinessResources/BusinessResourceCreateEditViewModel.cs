@@ -1,7 +1,7 @@
-using ERP_API.Models.Business;
-using ERP_API.Models.BusinessResources;
+using ErpApi.Models.BusinessResources;
+using ErpApi.Models.Business;
 
-namespace ERP_API.Models.BusinessResources
+namespace ErpApi.Models.BusinessResources
 {
     public class BusinessResourceCreateEditViewModel
     {

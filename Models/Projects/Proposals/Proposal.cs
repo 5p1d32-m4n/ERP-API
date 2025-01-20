@@ -1,18 +1,18 @@
-﻿using ERP_API.Models.Business;
-using ERP_API.Models.BusinessResources;
-using ERP_API.Models.ClientsVendors;
-using ERP_API.Models.Projects.Projects;
+﻿using ErpApi.Models.BusinessResources;
 using System.ComponentModel.DataAnnotations;
+using ErpApi.Models.Business;
+using ErpApi.Models.ClientsVendors;
+using ErpApi.Models.Projects.Projects;
 using ErpApi.Models.Projects.Proposals;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ERP_API.Models.Projects.Proposals
+namespace ErpApi.Models.Projects.Proposals
 {
     public class Proposal
     {
 
         public Proposal()
         {
-            this.DisciplinePercents = new List<DisciplinePercent>();
             this.AEDrawings = new List<ProjectAEDrawing>();
 
         }
@@ -29,32 +29,41 @@ namespace ERP_API.Models.Projects.Proposals
         public int? Duration { get; set; }
 
         //from Proposal Module
+        [ForeignKey(nameof(ProposalStatus))]
         public int ProposalStatusId { get; set; }
         public ProposalStatus ProposalStatus { get; set; }
+        [ForeignKey(nameof(ProposalType))]
         public int ProposalTypeId { get; set; }
         public ProposalType ProposalType { get; set; }
+        [ForeignKey(nameof(ProposalFormat))]
         public int ProposalFormatId { get; set; }
         public ProposalFormat ProposalFormat { get; set; }
-        public int BillingStyleId { get; set; }
-        public BillingStyle BillingStyle { get; set; }
 
         //from Project Module
+        [ForeignKey(nameof(Project))]
         public int? ProjectId { get; set; }
         public Project Project { get; set; }
 
         //from ClientVendor, Buisness, Project Module
+        [ForeignKey(nameof(ServiceType))]
         public int ServiceTypeId { get; set; }
         public ServiceType ServiceType { get; set; }
+        [ForeignKey(nameof(Complexity))]
         public int ComplexityId { get; set; }
         public Complexity Complexity { get; set; }
+
+        [ForeignKey(nameof(Impact))]
         public int ImpactId { get; set; }
         public Impact Impact { get; set; }
+        [ForeignKey(nameof(Client))]
         public int ClientId { get; set; }
         public ClientVendor Client { get; set; }
+        [ForeignKey(nameof(Sector))]
         public int SectorId { get; set; }
         public Sector Sector { get; set; }
 
         [Required(ErrorMessage = "This field is required")]
+        [ForeignKey(nameof(SectorCategory))]
         public int SectorCategoryId { get; set; }
 
         public SectorCategory SectorCategory { get; set; }
@@ -71,10 +80,10 @@ namespace ERP_API.Models.Projects.Proposals
         public int ServiceDeliverableyCategoryId { get; set; }
         public decimal SupervisionWeekHrs { get; set; } = 0.0M;
         public decimal SupervisionHrRate { get; set; } = 0.0M;
-        public decimal SupervisionCost {get;set;} = 0.0M; 
+        public decimal SupervisionCost { get; set; } = 0.0M;
         public bool IsB2B { get; set; } = false;
         public decimal B2BCost { get; set; } = 0.0M;
-        public decimal CalcSupervisionCost  => (SupervisionHrRate > 0 && SupervisionWeekHrs > 0) ? (SupervisionWeekHrs * (decimal)(Duration * 4.3) *  SupervisionHrRate) : 0; 
+        public decimal CalcSupervisionCost => (SupervisionHrRate > 0 && SupervisionWeekHrs > 0) ? (SupervisionWeekHrs * (decimal)(Duration * 4.3) * SupervisionHrRate) : 0;
 
 
         public decimal? Total { get; set; }
@@ -91,7 +100,6 @@ namespace ERP_API.Models.Projects.Proposals
 
 
         // A&E Proposal
-        public List<DisciplinePercent> DisciplinePercents { get; set; } = new List<DisciplinePercent>();
         public List<ProposalPhase> ProposalPhases { get; set; } = new List<ProposalPhase>();
         public List<ProjectAEDrawing> AEDrawings { get; set; }
         public List<ProjectDeliverable> Deliverables { get; set; } = new List<ProjectDeliverable>();
@@ -111,8 +119,6 @@ namespace ERP_API.Models.Projects.Proposals
         }
         public decimal CalcConstructionSupportEstimatedHours => ConstructionSupportHrRate > 0 ? (decimal)CalcConstructionSupportCost / (decimal)ConstructionSupportHrRate : 0;
         public decimal CalcTotalResources => Resources?.Sum(r => r.CalcResourceCost()) ?? 0;
-        public decimal? CalcDisciplineCost => DisciplinePercents?.Sum(dp => dp.CalcPotentialDisciplineCost(PotentialAECostTotal)) ?? 0;
-        public decimal? CalcDiscHrs => DisciplinePercents?.Sum(dp => dp.PotentialHrs(PotentialAECostTotal, PotentialHrRate)) ?? 0;
         public decimal? CalcDesignHrs()
         {
             if (PotentialHrRate > 0)
@@ -124,12 +130,14 @@ namespace ERP_API.Models.Projects.Proposals
                 return 0;
             }
         }
-        public decimal CalcDeliverables => Deliverables.Sum(d => d.IsSubconsultant ? d.TotalCost: d.Cost);
+        public decimal CalcDeliverables => Deliverables.Sum(d => d.IsSubconsultant ? d.TotalCost : d.Cost);
         public decimal CalcTotalIndirectCost => (CalcTotalAdditionalCosts + CalcTotalResources) * ((decimal)IndirectPercentage);
         public decimal CalcTotalCombinedCosts => CalcTotalResources + CalcTotalAdditionalCosts + CalcTotalIndirectCost;
         public decimal CalcTotalAECost => CalcDeliverables + ConstructionSupportCost + CalcSupervisionCost;
-        public decimal CalcB2BCost(){
-            try{
+        public decimal CalcB2BCost()
+        {
+            try
+            {
                 // Return zero if ServiceType is null or does not match known types
                 if (ServiceType == null && (ServiceTypeId != 1 && ServiceTypeId != 2))
                 {
@@ -175,8 +183,9 @@ namespace ERP_API.Models.Projects.Proposals
                 // For "Project Management" or ServiceTypeId == 1, return CalcTotalCombinedCosts or 0 if invalid
                 if ((ServiceType != null && ServiceType.Name == "Project Management") || ServiceTypeId == 1)
                 {
-                    if(IsB2B){
-                        return CalcTotalCombinedCosts > 0 ? (CalcTotalCombinedCosts + CalcTotalCombinedCosts * 0.04M): 0;
+                    if (IsB2B)
+                    {
+                        return CalcTotalCombinedCosts > 0 ? (CalcTotalCombinedCosts + CalcTotalCombinedCosts * 0.04M) : 0;
                     }
                     return CalcTotalCombinedCosts > 0 ? CalcTotalCombinedCosts : 0;
                 }
@@ -187,9 +196,10 @@ namespace ERP_API.Models.Projects.Proposals
                     // Return CalcTotalAECost only if Deliverables exist and the total cost is greater than zero
                     if ((Deliverables != null && Deliverables.Any()) || CalcTotalAECost > 0)
                     {
-                        if(IsB2B){
+                        if (IsB2B)
+                        {
 
-                        return CalcTotalAECost > 0 ? (CalcTotalAECost + CalcTotalAECost * 0.04M) : 0;
+                            return CalcTotalAECost > 0 ? (CalcTotalAECost + CalcTotalAECost * 0.04M) : 0;
                         }
                         return CalcTotalAECost > 0 ? CalcTotalAECost : 0;
                     }
@@ -204,50 +214,6 @@ namespace ERP_API.Models.Projects.Proposals
                 Console.WriteLine($"Unexpected error in CalcProposalTotal: {ex.Message}");
                 return 0;
             }
-        }
-        public decimal GetArchitectPercent(Proposal proposal)
-        {
-            foreach (var disciplinePercent in proposal.DisciplinePercents)
-            {
-                if (disciplinePercent.ArchitectPercent != 0)
-                {
-                    return disciplinePercent.ArchitectPercent;
-                }
-            }
-            return 0;  // Return 0 if 'ArchitectPercent' is not found in any of the 'DisciplinePercents'
-        }
-        public decimal GetDrafterPercent(Proposal proposal)
-        {
-            foreach (var disciplinePercent in proposal.DisciplinePercents)
-            {
-                if (disciplinePercent.DrafterPercent != 0)
-                {
-                    return disciplinePercent.DrafterPercent;
-                }
-            }
-            return 0;  // Return 0 if 'DrafterPercent' is not found in any of the 'DisciplinePercents'
-        }
-        public decimal GetArchitectRate(Proposal proposal)
-        {
-            foreach (var disciplinePercent in proposal.DisciplinePercents)
-            {
-                if (disciplinePercent.ArchitectRate != 0)
-                {
-                    return disciplinePercent.ArchitectRate;
-                }
-            }
-            return 0;  // Return 0 if 'ArchitectPercent' is not found in any of the 'DisciplinePercents'
-        }
-        public decimal GetDrafterRate(Proposal proposal)
-        {
-            foreach (var disciplinePercent in proposal.DisciplinePercents)
-            {
-                if (disciplinePercent.DrafterRate != 0)
-                {
-                    return disciplinePercent.DrafterRate;
-                }
-            }
-            return 0;  // Return 0 if 'DrafterPercent' is not found in any of the 'DisciplinePercents'
         }
 
     }

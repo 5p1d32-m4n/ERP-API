@@ -1,7 +1,6 @@
+using ErpApi.Models.Projects.Proposals;
 
-using ERP_API.Models.Projects.Proposals;
-
-namespace ERP_API.Models.Projects.Projects
+namespace ErpApi.Models.Projects.Projects
 {
     public class ProjectDeliverable
     {
@@ -37,6 +36,7 @@ namespace ERP_API.Models.Projects.Projects
         //public bool Invoiced {get; set;}
         public string InvoicedStatus {get; set;} = "Pending";
         public Proposal Proposal { get; set; }
+        public Project Project { get; set; }
 
         public decimal CalcEarnedValue(){
             var result = 0.0M;

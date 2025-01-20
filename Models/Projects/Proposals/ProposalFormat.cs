@@ -1,4 +1,4 @@
-﻿namespace ERP_API.Models.Projects.Proposals
+﻿namespace ErpApi.Models.Projects.Proposals
 {
 	public class ProposalFormat
 	{

@@ -1,7 +1,7 @@
-﻿using ERP_API.Models.Projects.Projects;
-using ERP_API.Models.BusinessResources;
+﻿using ErpApi.Models.BusinessResources;
+using ErpApi.Models.Projects.Projects;
 
-namespace ERP_API.Models.Timesheet
+namespace ErpApi.Models.Timesheet
 {
     public class TimesheetPayCodeCreateEditViewModel
     {

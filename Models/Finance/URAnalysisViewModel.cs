@@ -1,6 +1,6 @@
-using ERP_API.Models.BusinessResources;
+using ErpApi.Models.BusinessResources;
 
-namespace ERP_API.Models.Finance
+namespace ErpApi.Models.Finance
 {
 	public class URReportViewModel{
         public List<BusinessResource> AllResources { get; set; } = new List<BusinessResource>();

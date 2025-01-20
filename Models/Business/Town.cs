@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ERP_API.Models.Business
+namespace ErpApi.Models.Business
 {
     public class Town
     {

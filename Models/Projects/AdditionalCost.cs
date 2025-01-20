@@ -1,7 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using ERP_API.Models.Projects.Proposals;
+using ErpApi.Models.Projects.Projects;
+using ErpApi.Models.Projects.Proposals;
 
-namespace ERP_API.Models.Projects
+namespace ErpApi.Models.Projects
 {
     public class AdditionalCost
     {
@@ -20,6 +21,7 @@ namespace ERP_API.Models.Projects
         public int ProposalId { get; set; }
         public int ProjectId { get; set; }
         public Proposal Proposal { get; set; }
+        public Project Project { get; set; }
 
         public decimal CalcTotalCost()
 		{

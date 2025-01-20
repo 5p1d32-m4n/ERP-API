@@ -1,4 +1,4 @@
-﻿namespace ERP_API.Models.Notifications
+﻿namespace ErpApi.Models.Notifications
 {
 	public class Notification
 	{

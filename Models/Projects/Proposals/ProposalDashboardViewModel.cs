@@ -1,11 +1,10 @@
-
-using ERP_API.Models.Business;
-using ERP_API.Models.BusinessResources;
-using ERP_API.Models.ClientsVendors;
-using ERP_API.Models.Projects.Projects;
+using ErpApi.Models.Projects.Projects;
 using System.ComponentModel.DataAnnotations;
+using ErpApi.Models.Business;
+using ErpApi.Models.BusinessResources;
+using ErpApi.Models.ClientsVendors;
 
-namespace ERP_API.Models.Projects.Proposals
+namespace ErpApi.Models.Projects.Proposals
 {
     public class ProposalDashboardViewModel
     {

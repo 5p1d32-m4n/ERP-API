@@ -1,7 +1,7 @@
-using ERP_API.Models.Business;
-using ERP_API.Models.BusinessResources;
+using ErpApi.Models.Business;
+using ErpApi.Models.BusinessResources;
 
-namespace ERP_API.Models.BusinessResources{
+namespace ErpApi.Models.BusinessResources{
     public class EngineeringType{
         public int Id { get; set; }
         public string Name { get; set; }

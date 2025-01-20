@@ -1,6 +1,8 @@
-﻿using ERP_API.Models.BusinessResources;
+﻿using ErpApi.Models.BusinessResources;
+using ErpApi.Models.Projects.Projects;
+using ErpApi.Models.Projects.Proposals;
 
-namespace ERP_API.Models.Projects
+namespace ErpApi.Models.Projects
 {
 	public class ProjectResource
 	{
@@ -21,8 +23,10 @@ namespace ERP_API.Models.Projects
 		public int ProjectDuration { get; set; }
 		public decimal Hours { get; set; }
 		public decimal Cost { get; set; }
-		
-		public decimal CalcBillRate(){
+        public Proposal Proposal { get; set; }
+        public Project Project { get; set; }
+
+        public decimal CalcBillRate(){
 			decimal result = 0.0M;
 			result = BareRate * Multiplier;
 			return result;
@@ -45,8 +49,5 @@ namespace ERP_API.Models.Projects
 
 		// Stage Two Updates (Post testing in production)
 
-		// For Discipline Effort Only.
-		public int DisciplinePercentId { get; set; }
-		public int SubDisciplinePercentId { get; set; }
 	}
 }

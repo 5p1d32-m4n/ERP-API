@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
-namespace ERP_API.Models.Assets
+namespace ErpApi.Models.Assets
 {
     public class Asset
     {

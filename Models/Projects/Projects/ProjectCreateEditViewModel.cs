@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using ERP_API.Models.Business;
-using ERP_API.Models.BusinessResources;
-using ERP_API.Models.ClientsVendors;
+using ErpApi.Models.Business;
+using ErpApi.Models.BusinessResources;
+using ErpApi.Models.ClientsVendors;
 
-namespace ERP_API.Models.Projects.Projects
+namespace ErpApi.Models.Projects.Projects
 {
     public class ProjectCreateEditViewModel
     {
