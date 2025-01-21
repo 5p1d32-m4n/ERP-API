@@ -34,10 +34,10 @@ namespace ErpApi.Models.Projects.Projects
 
         public DateTime CreatedDate { get; set; }
 
-        public List<ProjectInvoiceDetail> Details { get; set; } = new List<ProjectInvoiceDetail>();
+        public List<ProjectInvoiceDetail> ProjectInvoiceDetails{ get; set; } = new List<ProjectInvoiceDetail>();
 
         public decimal CalcAmount(){
-            var result = Details.Sum(d=>d.Amount);
+            var result = ProjectInvoiceDetails.Sum(d=>d.Amount);
 			return result;
         }
 

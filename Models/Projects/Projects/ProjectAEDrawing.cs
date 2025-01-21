@@ -40,5 +40,6 @@ namespace ErpApi.Models.Projects.Projects
         public decimal Multiplier { get; set; }
         public decimal BillingRate { get; set; }
         public decimal TotalCost { get; set; }
+        public int DesignDisciplineId { get; set; }
     }
 }

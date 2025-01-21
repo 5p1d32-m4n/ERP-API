@@ -122,33 +122,39 @@ public class ProposalRepository : IProposalRepository
 
         public async Task<IEnumerable<ProjectDeliverable>> GetProposalDeliverablesAsync()
         {
-            return await _context.ProposalDeliverables.ToListAsync();
+            // return await _context.ProposalDeliverables.ToListAsync();
+            throw new NotImplementedException();
         }
 
         public async Task<IEnumerable<Phase>> GetPhasesAsync()
         {
-            return await _context.Phases.ToListAsync();
+            // return await _context.Phases.ToListAsync();
+            throw new NotImplementedException();
         }
 
 
         public async Task<IEnumerable<SubDisciplinePercent>> GetSubDisciplinePercentsAsync()
         {
-            return await _context.SubDisciplinePercents.ToListAsync();
+            // return await _context.SubDisciplinePercents.ToListAsync();
+            throw new NotImplementedException();
         }
 
         public async Task<IEnumerable<BillingStyle>> GetBillingStylesAsync()
         {
-            return await _context.BillingStyles.ToListAsync();
+            // return await _context.BillingStyles.ToListAsync();
+            throw new NotImplementedException();
         }
 
         public async Task<IEnumerable<ClientVendor>> GetClientsVendorsAsync()
         {
-            return await _context.ClientsVendors.ToListAsync();
+            // return await _context.ClientsVendors.ToListAsync();
+            throw new NotImplementedException();
         }
 
         public async Task<IEnumerable<ProposalPhase>> GetProposalPhasesAsync()
         {
-            return await _context.ProposalPhases.ToListAsync();
+            // return await _context.ProposalPhases.ToListAsync();
+            throw new NotImplementedException();
         }
 
         public async Task<IEnumerable<Proposal>> GetProposalsByClientIdAsync(int clientId)

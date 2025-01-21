@@ -145,6 +145,7 @@ namespace ErpApi.Models.Projects.Projects
         public List<ProjectDeliverable> Deliverables { get; set; } = new List<ProjectDeliverable>();
 
         public List<ProjectInvoice> Invoices { get; set; } = new List<ProjectInvoice>();
+        public List<ProjectSubConsultant> SubConsultants { get; set; }
 
 
         // Statistics

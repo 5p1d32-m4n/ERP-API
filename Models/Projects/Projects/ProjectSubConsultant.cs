@@ -8,5 +8,6 @@ namespace ErpApi.Models.Projects.Projects
         public string Name {get; set;}
         public decimal Cost {get; set;}
         public DateTime? Date {get; set;}
+        public Project Project { get; set; }
     }
 }
