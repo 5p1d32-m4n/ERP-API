@@ -95,6 +95,11 @@ public class ProposalRepository : IProposalRepository
             return await _context.SectorCategories.ToListAsync();
         }
 
+        public async Task<IEnumerable<ServiceDeliverableCategory>> GetServiceDeliverableCategoriesAsync()
+        {
+            return await _context.ServiceDeliverableCategories.ToListAsync();
+        }
+
         public async Task<IEnumerable<ProposalStatus>> GetProposalStatusesAsync()
         {
             return await _context.ProposalStatuses.ToListAsync();
