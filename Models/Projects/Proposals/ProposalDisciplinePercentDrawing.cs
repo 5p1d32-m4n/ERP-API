@@ -4,7 +4,8 @@ namespace ErpApi.Models.Projects.Proposals
     public class ProposalDisciplinePercentDrawing
     {
         public int Id { get; set; }
-        public int DrawingId { get; set; } // from AEDrawings table.
+        public AEDrawing AEDrawing { get; set; }
+        public int AEDrawingId { get; set; } // from AEDrawings table.
         public SubDisciplinePercent SubDisciplinePercent { get; set; }
 
         public int SubDisciplinePercentId { get; set; }
