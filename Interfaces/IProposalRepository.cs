@@ -21,6 +21,7 @@ public interface IProposalRepository
         Task<IEnumerable<Impact>> GetImpactsAsync();
         Task<IEnumerable<Sector>> GetSectorsAsync();
         Task<IEnumerable<SectorCategory>> GetSectorCategoriesAsync();
+        Task<IEnumerable<ServiceDeliverableCategory>> GetServiceDeliverableCategoriesAsync();
         Task<IEnumerable<ProposalStatus>> GetProposalStatusesAsync();
         Task<IEnumerable<StatusOption>> GetStatusOptionsAsync();
         Task<IEnumerable<ProposalFormat>> GetProposalFormatsAsync();
