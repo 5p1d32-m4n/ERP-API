@@ -27,19 +27,16 @@ namespace ErpApi.Data
         public DbSet<ProposalFormat> ProposalFormats { get; set; }
         public DbSet<ProjectResource> ProposalResources { get; set; }
         public DbSet<AdditionalCost> ProposalAdditionalCosts { get; set; }
-        public DbSet<ProjectDeliverable> ProposalDeliverables { get; set; }
-        public DbSet<Phase> Phases { get; set; }
-        public DbSet<SubDisciplinePercent> SubDisciplinePercents { get; set; }
-        public DbSet<BillingStyle> BillingStyles { get; set; }
-        public DbSet<ClientVendor> ClientsVendors { get; set; }
-        public DbSet<ProposalPhase> ProposalPhases { get; set; }
+        public DbSet<Project> Projects { get; set; }
+        public DbSet<ProjectDeliverable> ProjectDeliverables { get; set; }
+        public DbSet<ProjectInvoice> ProjectInvoices { get; set; }
+        public DbSet<ProjectInvoiceDetail> ProjectInvoiceDetails { get; set; }
+        public DbSet<ProjectSubConsultant> ProjectSubConsultants { get; set; }
+        public DbSet<ProjectResource> ProjectResources { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Existing tables
-            modelBuilder.Entity<BillingStyle>().ToTable("BillingStyles", t => t.ExcludeFromMigrations());
-
-            // Explicit relationships
+            // Proposal relationships
             modelBuilder.Entity<Proposal>()
                 .HasOne(p => p.Client)
                 .WithMany()
@@ -65,9 +62,9 @@ namespace ErpApi.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Proposal>()
-                .HasOne(p => p.SectorCategory)
+                .HasOne(p => p.Complexity)
                 .WithMany()
-                .HasForeignKey(p => p.SectorCategoryId)
+                .HasForeignKey(p => p.ComplexityId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Proposal>()
@@ -77,56 +74,65 @@ namespace ErpApi.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Proposal>()
-                .HasOne(p => p.Complexity)
+                .HasOne(p => p.SectorCategory)
                 .WithMany()
-                .HasForeignKey(p => p.ComplexityId)
+                .HasForeignKey(p => p.SectorCategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Proposal>()
                 .HasOne(p => p.ProposalFormat)
                 .WithMany()
                 .HasForeignKey(p => p.ProposalFormatId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Proposal>()
-                .HasOne(p => p.Project)
+                .HasOne(p => p.ProposalStatus)
                 .WithMany()
-                .HasForeignKey(p => p.ProjectId);
-
-            modelBuilder.Entity<ProposalStatus>()
-                .HasOne(s => s.StatusOption)
-                .WithMany()
-                .HasForeignKey(s => s.StatusId)
+                .HasForeignKey(p => p.ProposalStatusId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<ProposalStatus>()
-                .HasOne(s => s.Proposal)
+            // Project relationships
+            modelBuilder.Entity<Project>()
+                .HasOne(p => p.Client)
                 .WithMany()
-                .HasForeignKey(s => s.ProposalId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<ProposalPhase>()
-                .HasOne(pp => pp.Proposal)
-                .WithMany(p => p.ProposalPhases)
-                .HasForeignKey(pp => pp.ProposalId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<ProposalPhase>()
-                .HasOne(pp => pp.ServiceDeliverable)
-                .WithMany()
-                .HasForeignKey(pp => pp.ServiceDeliverableId)
+                .HasForeignKey(p => p.ClientId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<AdditionalCost>()
-                .HasOne(a => a.Proposal)
-                .WithMany(p => p.AdditionalCosts)
-                .HasForeignKey(a => a.ProposalId)
-                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Project>()
+                .HasOne(p => p.ServiceType)
+                .WithMany()
+                .HasForeignKey(p => p.ServiceTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<AdditionalCost>()
-                .HasOne(a => a.Project)
-                .WithMany(p => p.AdditionalCosts)
-                .HasForeignKey(a => a.ProjectId)
+            modelBuilder.Entity<Project>()
+                .HasOne(p => p.ProjectType)
+                .WithMany()
+                .HasForeignKey(p => p.ProjectTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Project>()
+                .HasOne(p => p.Complexity)
+                .WithMany()
+                .HasForeignKey(p => p.ComplexityId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Project>()
+                .HasOne(p => p.Impact)
+                .WithMany()
+                .HasForeignKey(p => p.ImpactId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Project>()
+                .HasOne(p => p.SectorCategory)
+                .WithMany()
+                .HasForeignKey(p => p.SectorCategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Additional relationships
+            modelBuilder.Entity<ProjectDeliverable>()
+                .HasOne(d => d.Project)
+                .WithMany(p => p.Deliverables)
+                .HasForeignKey(d => d.ProjectId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<ProjectDeliverable>()
@@ -135,17 +141,23 @@ namespace ErpApi.Data
                 .HasForeignKey(d => d.ProposalId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<ProjectDeliverable>()
-                .HasOne(d => d.Project)
-                .WithMany(p => p.Deliverables)
-                .HasForeignKey(d => d.ProjectId)
+            modelBuilder.Entity<ProjectAEDrawing>()
+                .HasOne(d => d.AEDiscipline)
+                .WithMany()
+                .HasForeignKey(d => d.AEDisciplineId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<ProjectResource>()
-                .HasOne(r => r.Resource)
+            modelBuilder.Entity<ProjectAEDrawing>()
+                .HasOne(d => d.AESubDiscipline)
                 .WithMany()
-                .HasForeignKey(r => r.ResourceId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasForeignKey(d => d.AESubDisciplineId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ProjectAEDrawing>()
+                .HasOne(d => d.DesignDiscipline)
+                .WithMany()
+                .HasForeignKey(d => d.DesignDisciplineId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ProjectResource>()
                 .HasOne(r => r.Project)
@@ -159,12 +171,6 @@ namespace ErpApi.Data
                 .HasForeignKey(r => r.ProposalId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<ProjectResourceDetail>()
-                .HasOne(rd => rd.Project)
-                .WithMany(p => p.ResourcesDetails)
-                .HasForeignKey(rd => rd.ProjectId)
-                .OnDelete(DeleteBehavior.NoAction);
-
             modelBuilder.Entity<ProjectInvoice>()
                 .HasOne(i => i.Project)
                 .WithMany(p => p.Invoices)
@@ -173,50 +179,45 @@ namespace ErpApi.Data
 
             modelBuilder.Entity<ProjectInvoiceDetail>()
                 .HasOne(id => id.ProjectInvoice)
-                .WithMany(i => i.Details)
+                .WithMany(pi => pi.ProjectInvoiceDetails)
                 .HasForeignKey(id => id.ProjectInvoiceId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<ProjectAEDrawing>()
+            modelBuilder.Entity<ProjectSubConsultant>()
+                .HasOne(sc => sc.Project)
+                .WithMany(p => p.SubConsultants)
+                .HasForeignKey(sc => sc.ProjectId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<AdditionalCost>()
+                .HasOne(ac => ac.Project)
+                .WithMany(p => p.AdditionalCosts)
+                .HasForeignKey(ac => ac.ProjectId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<AdditionalCost>()
+                .HasOne(ac => ac.Proposal)
+                .WithMany(p => p.AdditionalCosts)
+                .HasForeignKey(ac => ac.ProposalId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<DesignDiscipline>()
                 .HasOne(d => d.AEDiscipline)
                 .WithMany()
                 .HasForeignKey(d => d.AEDisciplineId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<ProjectAEDrawing>()
+            modelBuilder.Entity<DesignDiscipline>()
                 .HasOne(d => d.AESubDiscipline)
                 .WithMany()
                 .HasForeignKey(d => d.AESubDisciplineId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<ProjectAEDrawing>()
+            modelBuilder.Entity<DesignDiscipline>()
                 .HasOne(d => d.Project)
-                .WithMany(p => p.ProjectAEDrawings)
+                .WithMany()
                 .HasForeignKey(d => d.ProjectId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<DesignDiscipline>()
-                .HasOne(dd => dd.AEDiscipline)
-                .WithMany()
-                .HasForeignKey(dd => dd.AEDisciplineId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<DesignDiscipline>()
-                .HasOne(dd => dd.AESubDiscipline)
-                .WithMany()
-                .HasForeignKey(dd => dd.AESubDisciplineId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<DesignDiscipline>()
-                .HasOne(dd => dd.Project)
-                .WithMany(p => p.DesignDisciplines)
-                .HasForeignKey(dd => dd.ProjectId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<ProposalDisciplinePercentDrawing>()
-                .HasOne(d => d.SubDisciplinePercent)
-                .WithMany(s => s.Drawings)
-                .HasForeignKey(d => d.SubDisciplinePercentId);
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
