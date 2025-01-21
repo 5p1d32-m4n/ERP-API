@@ -1,4 +1,5 @@
 ﻿using ErpApi.Models.Projects.Proposals;
+using ErpApi.Models.Projects;
 using ErpApi.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -71,6 +72,57 @@ public class ProposalController : Controller
         {
             var proposalTypes = await _proposalRepository.GetProposalTypesAsync();
             return Ok(proposalTypes);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    [HttpGet]
+    [Route("projectTypes")]
+    [ProducesResponseType(200, Type = typeof(IEnumerable<ProjectType>))]
+    public async Task<IActionResult> GetProjectTypes()
+    {
+        try
+        {
+            var projectTypes = await _proposalRepository.GetProjectTypesAsync();
+            return Ok(projectTypes);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    [HttpGet]
+    [Route("serviceTypes")]
+    [ProducesResponseType(200, Type = typeof(IEnumerable<ServiceType>))]
+    public async Task<IActionResult> GetServiceTypes()
+    {
+        try
+        {
+            var serviceTypes = await _proposalRepository.GetServiceTypesAsync();
+            return Ok(serviceTypes);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    [HttpGet]
+    [Route("serviceDeliverableCategories")]
+    [ProducesResponseType(200, Type = typeof(IEnumerable<ServiceDeliverableCategory>))]
+    public async Task<IActionResult> GetServiceDeliverableCategories()
+    {
+        try
+        {
+            var serviceDeliverableCategories = await _proposalRepository.GetServiceDeliverableCategoriesAsync();
+            return Ok(serviceDeliverableCategories);
         }
         catch (Exception e)
         {
