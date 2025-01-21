@@ -1,0 +1,1074 @@
+﻿using System.Data;
+// using Dapper;
+using Microsoft.Data.SqlClient;
+using ErpApi.Models.Business;
+using ErpApi.Models.BusinessResources;
+using ErpApi.Models.ClientsVendors;
+using ErpApi.Models.Projects;
+using ErpApi.Models.Projects.Projects;
+
+namespace STG_ERP.Services
+{
+	public interface IRepoProjects{
+        #region Projects
+		Task<Project> GetProjectById(int Id);
+        Task<(List<Project>, int totalCount)> GetAllProjectsPages(string searchKeyword, int pageNumber, int pageSize, string serviceType,string projectStatus, string sectorCategory);
+		Task<List<Project>> GetProjects();
+		Task<int> GetNextProjectId();
+		Task<int> CreateProject(Project project);
+		Task DeleteProject(int Id);
+		Task UpdateProject(Project project);
+
+        #endregion
+
+        #region Project Type
+        Task<IEnumerable<ProjectType>> GetProjectTypes();
+        Task<ProjectType> GetProjectTypeById(int Id);
+        #endregion
+
+        #region Service Type
+        Task<IEnumerable<ServiceType>> GetServiceTypes();
+        Task<ServiceType> GetServiceTypeById(int Id);
+        #endregion
+
+        #region Complexities
+        Task<IEnumerable<Complexity>> GetComplexities();
+        Task<Complexity> GetComplexityById(int Id);
+        #endregion
+
+        #region Impacts
+        Task<IEnumerable<Impact>> GetImpacts();
+        Task<Impact> GetImpactById(int Id);
+        #endregion
+
+        #region Resources
+        Task<List<ProjectResource>> GetResourcesByProjectId(int ProjectId);
+
+        Task<List<BusinessResource>> GetTSResourceByProjectId(int ProjectId);
+        
+        Task<ProjectResource> GetResourceById(int id);
+        Task<ProjectResource> GetResourceByIdAndProjectIdAndPosition(int id,int projectId,string position);
+        Task<int> AddProjectPMResource (ProjectResource resource);
+        Task UpdateProjectPMResource (ProjectResource resource);
+        Task<int> AddProjectResource(ProjectResource resource);
+        Task DeleteProjectPMResource(int id);
+        #endregion
+
+        #region Resources Details
+        Task<List<ProjectResourceDetail>> GetResourcesDetailsByProjectId(int ProjectId);
+        #endregion
+
+        #region Additional Costs
+        Task<List<AdditionalCost>> GetAdditionalCostsByProjectId(int ProjectId);
+        Task<AdditionalCost> GetAdditionalCostsById(int id);
+        
+        Task<int> AddProjectAdditionalCost (AdditionalCost resource);
+        Task DeleteProjectAdditionalCost(int id);
+        #endregion
+
+        #region Deliverables
+        Task<IEnumerable<ServiceDeliverableCategory>> GetDeliverableCategories();
+        Task<IEnumerable<ServiceDeliverable>> GetServiceDeliverablesByCategoryId(int CategoryId);
+        Task<List<ServiceDeliverable>> GetDeliverablesByCategoryName(string CategoryName);
+        Task<List<ProjectDeliverable>> GetDeliverablesByProjectId(int ProjectId);
+        Task<ProjectDeliverable> GetDeliverableById(int id);
+        Task<List<ProjectDeliverableMonthData>> GetDeliverablesMonthDataByProjectId(int ProjectId);
+        Task<int> AddProjectDeliverable(ProjectDeliverable projectDeliverable);
+        Task DeleteProjectDeliverable(int id);
+        Task UpdateProjectDeliverable(ProjectDeliverable projectDeliverable);
+
+        Task<List<DesignDiscipline>> GetDesignDisciplinesByProjectId(int id);
+        Task AddProjectDesignDiscipline(DesignDiscipline designDiscipline);
+        Task DeleteProjectDesignDiscipline(int id);
+        #endregion
+
+        #region Invoices
+        Task<int> GetNextInvoiceId();
+        Task<List<ProjectInvoice>> GetInvoicesByProjectId(int ProjectId);
+        Task<ProjectInvoice> GetProjectInvoiceById(int InvoiceId);
+        Task<int> AddProjectInvoice(ProjectInvoice projectInvoice);
+        Task DeleteProjectInvoice(int Id);
+        Task UpdateProjectInvoice(ProjectInvoice projectInvoice);
+        Task UpdateProjectInvoiceCummulativeByProjectId(int ProjectId, decimal ProjectTotal);
+        Task<List<ProjectInvoiceDetail>> GetProjectInvoiceDetailsByInvoiceId(int ProjectInvoiceId);
+        Task<ProjectInvoiceDetail> GetProjectInvoiceDetail(int Id);
+        Task<int> AddProjectInvoiceDetail(ProjectInvoiceDetail projectInvoiceDetail);
+        Task DeleteProjectInvoiceDetail(int Id);
+        #endregion
+
+
+        #region SubConsultants
+        Task<List<ProjectSubConsultant>> GetSubConsultantsByProjectId(int ProjectId);
+        Task AddProjectSubConsultant(ProjectSubConsultant subConsultant);
+        Task DeleteProjectSubConsultant(int ProjectId);
+        
+        #endregion
+
+        #region AEDrawings
+        Task<IEnumerable<AEDiscipline>> GetDisciplines();
+        Task<IEnumerable<AESubDiscipline>> GetSubDisciplinesByDisciplineId(int DisciplineId);
+        Task<IEnumerable<AEDrawingTemplate>> GetAEDrawingsTemplates(int disciplineId, int subDisciplineId);
+        Task<List<ProjectAEDrawing>> GetAEProjectDrawingsByProjectId (int ProjectId);
+        Task AddProjectAEDrawing(ProjectAEDrawing aeDrawing);
+        Task DeleteProjectAEDrawing(int id);
+
+        #endregion
+
+        #region Timesheets
+
+        Task<List<ProjectJobTimesheet>> GetTimesheetsDataByShortCode(string ShortCode);
+        Task<List<ProjectJobTimesheetsMonthData>> GetTimesheetsMonthDataByShortCode(string ShortCode);
+        #endregion
+
+        #region Statistics
+        public Task UpdateProjectStatistics(int projectId);
+        public Task<List<ProjectAnalysis>> GetProjectAnalysis(int projectId);
+        #endregion
+    }
+	public class RepoProjects : IRepoProjects
+	{
+		private readonly string connectionString;
+		public RepoProjects(IConfiguration configuration)
+        {
+            this.connectionString = configuration.GetConnectionString("DefaultConnection");
+        }
+
+        #region Projects
+        public async Task<int> CreateProject(Project project)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"INSERT INTO Projects (
+                    ProposalId, Number, ProjectName,Description,ProjectTypeId,ClientId,DueDate,Duration,ServiceTypeId,SectorCategoryId,ComplexityId,ImpactId,ProjectBudget,EngPercentStd,EngDesignCost,EngDesignHrRate,EngDesignHrs,CreatedDate,CreatedBy,Status,IndirectPercent,IndirectCost,IndirectCostComment,IsB2B,B2BCost,Total,InvoicedCount,InvoicedCummulative,InvoicedBalance,ResourcesHours,ResourcesCost,AdditionalCost, ConstructionSupportCost,ConstructionSupportPercent,ConstructionSupportComment,ConstructionSupportHrRate,ConstructionSupportHrs,SupervisionWeekHrs,SupervisionHrRate,SupervisionCost,TimesheetsBillRateCost,TimesheetsBareRateCost,TimesheetProfitCost,TimesheetProfitPercent,CompletionPercent)
+                    VALUES(
+                    @ProposalId, @Number, @ProjectName,@Description,@ProjectTypeId,@ClientId,@DueDate,@Duration,@ServiceTypeId,@SectorCategoryId,@ComplexityId,@ImpactId,@ProjectBudget,@EngPercentStd,@EngDesignCost,@EngDesignHrRate,@EngDesignHrs,@CreatedDate,@CreatedBy,@Status,@IndirectPercent,@IndirectCost,@IndirectCostComment,@IsB2B,@B2BCost,@Total,@InvoicedCount,@InvoicedCummulative,@InvoicedBalance,@ResourcesHours,@ResourcesCost,@AdditionalCost,@ConstructionSupportCost,@ConstructionSupportPercent,@ConstructionSupportComment,@ConstructionSupportHrRate,@ConstructionSupportHrs,@SupervisionWeekHrs,@SupervisionHrRate,@SupervisionCost,@TimesheetsBillRateCost,@TimesheetsBareRateCost,@TimesheetProfitCost,@TimesheetProfitPercent,@CompletionPercent);
+					SELECT CAST(SCOPE_IDENTITY() as int)";
+
+            
+			var id = await connection.QuerySingleAsync<int>(sql, project);
+
+			return id;
+        }
+
+        public async Task DeleteProject(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+			var sql = @"DELETE FROM Projects WHERE Id = @id";
+
+			await connection.ExecuteAsync(sql, new {id});
+        }
+
+        public async Task<List<Project>> GetProjects()
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT p.*,s.*,c.* FROM Projects p 
+            LEFT JOIN ServiceTypes s ON p.ServiceTypeId = s.Id
+            LEFT JOIN ClientsVendors c ON p.ClientId = c.Id
+            ORDER BY p.Id DESC";
+
+            var result = await connection.QueryAsync<Project, ServiceType, ClientVendor,Project>(sql,
+                map:(project,serviceType,client)=>{
+                    project.Client = client;
+                    project.ServiceType = serviceType;
+                    return project;
+                },
+                splitOn:"Id,Id");
+
+            return result.ToList();
+        }
+
+        public async Task<int> GetNextProjectId(){
+            using var connection = new SqlConnection(connectionString);
+            var sql = "SELECT COUNT(Id) FROM Projects";
+            var count = await connection.QueryFirstOrDefaultAsync<int>(sql);
+
+            if(count == 0){
+                return 1;
+            }else{
+                sql = "SELECT IDENT_CURRENT('Projects') + IDENT_INCR('Projects') AS NextProjectId";
+                var id = await connection.QueryFirstOrDefaultAsync<int>(sql);
+                return id;
+            }
+        }
+
+        public async Task<(List<Project>, int totalCount)> GetAllProjectsPages(string searchKeyword, int pageNumber, int pageSize, string serviceType,string projectStatus, string sectorCategory){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @$"SELECT p.*,s.*,sc.*,c.* FROM Projects p
+                LEFT JOIN ServiceTypes s ON p.ServiceTypeId = s.Id
+                LEFT JOIN SectorCategories sc ON p.SectorCategoryId = sc.Id
+                LEFT JOIN ClientsVendors c ON p.ClientId = c.Id
+                WHERE p.ProjectName LIKE '%{searchKeyword}%' AND s.Name LIKE '%{serviceType}%' AND sc.Name LIKE '%{sectorCategory}%' AND p.Status LIKE '%{projectStatus}%'
+                ORDER BY p.CreatedDate DESC
+                OFFSET {(pageNumber -1) * pageSize} ROWS
+                FETCH NEXT {pageSize}
+                ROWS ONLY;";
+
+            var result = await connection.QueryAsync<Project, ServiceType,SectorCategory, ClientVendor,Project>(sql,
+                map:(project,serviceType,sectorCategory,client)=>{
+                    project.Client = client;
+                    project.SectorCategory = sectorCategory;
+                    project.ServiceType = serviceType;
+                    return project;
+                },
+                splitOn:"Id,Id,Id");
+
+            var sqlRecordsCount = @$"SELECT COUNT(p.Id) FROM Projects p
+                LEFT JOIN ServiceTypes s ON p.ServiceTypeId = s.Id
+                LEFT JOIN SectorCategories sc ON p.SectorCategoryId = sc.Id
+                LEFT JOIN ClientsVendors c ON p.ClientId = c.Id
+                WHERE p.ProjectName LIKE '%{searchKeyword}%' AND s.Name LIKE '%{serviceType}%' AND sc.Name LIKE '%{sectorCategory}%' AND p.Status LIKE '%{projectStatus}%';";
+
+            var recordsCount = await connection.ExecuteScalarAsync<int>(sqlRecordsCount);
+
+            return (result.ToList(),recordsCount);
+        }
+
+        public async Task<Project> GetProjectById(int Id)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT p.*, s.* FROM Projects p 
+                LEFT JOIN ServiceTypes s on p.ServiceTypeId = s.Id 
+                WHERE p.Id=@Id";
+
+            var result = await connection.QueryAsync<Project,ServiceType,Project>(
+                sql,
+                (project,serviceType)=>{
+                    project.ServiceType = serviceType;
+                    return project;
+                },
+                new{Id},
+                splitOn:"Id"
+            );
+
+            return result.First();
+        }
+
+        public async Task UpdateProject(Project project)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"UPDATE Projects
+                    SET
+                    Number = @Number,
+                    ProjectName = @ProjectName,
+                    Description = @Description,
+                    ProjectTypeId = @ProjectTypeId,
+                    ClientId = @ClientId,
+                    DueDate = @DueDate,
+                    Duration = @Duration,
+                    ServiceTypeId = @ServiceTypeId,
+                    SectorCategoryId = @SectorCategoryId,
+                    ComplexityId = @ComplexityId,
+                    ImpactId = @ImpactId,
+                    ProjectBudget = @ProjectBudget,
+                    ResourcesHours = @ResourcesHours,
+                    ResourcesCost = @ResourcesCost,
+                    AdditionalCost = @AdditionalCost,
+                    IndirectPercent = @IndirectPercent,
+                    IndirectCost = @IndirectCost,
+                    IndirectCostComment = @IndirectCostComment,
+                    IsB2B = @IsB2B,
+                    B2BCost = @B2BCost,
+                    Total = @Total,
+                    InvoicedCount = @InvoicedCount,
+                    InvoicedCummulative = @InvoicedCummulative,
+                    InvoicedBalance = @InvoicedBalance,
+                    EngDesignCost = @EngDesignCost,
+                    EngPercentStd = @EngPercentStd,
+                    EngDesignHrRate = @EngDesignHrRate,
+                    EngDesignHrs = @EngDesignHrs,
+                    ConstructionSupportCost = @ConstructionSupportCost,
+                    ConstructionSupportPercent = @ConstructionSupportPercent,
+                    ConstructionSupportComment = @ConstructionSupportComment,
+                    ConstructionSupportHrRate = @ConstructionSupportHrRate,
+                    ConstructionSupportHrs = @ConstructionSupportHrs,
+                    SupervisionWeekHrs = @SupervisionWeekHrs,
+                    SupervisionHrRate = @SupervisionHrRate,
+                    SupervisionCost = @SupervisionCost,
+                    Status = @Status
+                    WHERE Id = @Id";
+
+			await connection.ExecuteAsync(sql, project);
+        }
+        #endregion
+
+        #region Project Type
+        public async Task<IEnumerable<ProjectType>> GetProjectTypes(){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT * FROM ProjectTypes Order By Name";
+
+            var result = await connection.QueryAsync<ProjectType>(sql);
+
+            return result;
+        }
+
+        public  async Task<ProjectType> GetProjectTypeById(int Id){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT * FROM ProjectTypes
+                WHERE Id = @Id;";
+
+            var result = await connection.QueryFirstOrDefaultAsync<ProjectType>(sql,new{Id});
+
+            return result;
+        }
+        #endregion
+
+        #region Service Type
+        public async Task<IEnumerable<ServiceType>> GetServiceTypes(){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT * FROM ServiceTypes Order By Name";
+
+            var result = await connection.QueryAsync<ServiceType>(sql);
+
+            return result;
+        }
+
+        public  async Task<ServiceType> GetServiceTypeById(int Id){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT * FROM ServiceTypes
+                WHERE Id = @Id;";
+
+            var result = await connection.QueryFirstOrDefaultAsync<ServiceType>(sql,new{Id});
+
+            return result;
+        }
+        #endregion
+
+        #region Complexities
+        public async Task<IEnumerable<Complexity>> GetComplexities(){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT * FROM Complexities Order By Name";
+
+            var result = await connection.QueryAsync<Complexity>(sql);
+
+            return result;
+        }
+
+        public  async Task<Complexity> GetComplexityById(int Id){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT * FROM Complexities
+                WHERE Id = @Id;";
+
+            var result = await connection.QueryFirstOrDefaultAsync<Complexity>(sql,new{Id});
+
+            return result;
+        }
+        #endregion
+
+        #region Impacts
+        public async Task<IEnumerable<Impact>> GetImpacts(){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT * FROM Impacts Order By Name";
+
+            var result = await connection.QueryAsync<Impact>(sql);
+
+            return result;
+        }
+
+        public  async Task<Impact> GetImpactById(int Id){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT * FROM Impacts
+                WHERE Id = @Id;";
+
+            var result = await connection.QueryFirstOrDefaultAsync<Impact>(sql,new{Id});
+
+            return result;
+        }
+        #endregion
+
+        #region Resources
+        public async Task<List<ProjectResource>> GetResourcesByProjectId(int ProjectId){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT p.*,r.* FROM ProjectResources p 
+            LEFT JOIN BusinessResources r ON p.ResourceId = r.Id WHERE p.ProjectId = @ProjectId;";
+
+            var result = await connection.QueryAsync<ProjectResource,BusinessResource,ProjectResource>(
+                sql,
+                (projectResource,businessResource)=>{
+                    projectResource.Resource =businessResource;
+                    return projectResource;
+                },
+                new{ProjectId},
+                splitOn:"Id");
+
+            return result.ToList();
+        }
+        
+        public async Task<List<BusinessResource>> GetTSResourceByProjectId(int ProjectId){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT r.* FROM BusinessResources r
+                LEFT JOIN TimeSheetResourcePayCodes rp ON rp.ResourceId = r.Id
+                LEFT JOIN TimeSheetPayCodes p ON rp.PayCodeId = p.Id
+                WHERE p.ProjectId = @ProjectId;";
+
+            var result = await connection.QueryAsync<BusinessResource>(sql,new{ProjectId});
+
+            return result.ToList();
+        }
+
+        public async Task<ProjectResource> GetResourceById(int id){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT * FROM ProjectResources WHERE Id = @id;";
+
+            var result = await connection.QuerySingleOrDefaultAsync<ProjectResource>(sql,new{id});
+
+            return result;
+        }
+
+        // Task<ProjectResource> GetResourceByIdAndProjectIdAndPosition(int id,int projectId,string position);
+        public async Task<ProjectResource> GetResourceByIdAndProjectIdAndPosition(int id,int projectId,string position){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT * FROM ProjectResources WHERE ResourceId = @id AND ProjectId = @projectId AND Position=@position;";
+
+            var result = await connection.QuerySingleOrDefaultAsync<ProjectResource>(sql,new{id,projectId,position});
+
+            return result;
+        }
+
+        public async Task<int> AddProjectPMResource (ProjectResource resource)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"INSERT INTO ProjectResources(ProjectId,ResourceId,Name,Position,BareRate,Quantity,CommitPerc,Hours,Multiplier,BillRate,Cost)
+                    VALUES(@ProjectId,@ResourceId,@Name,@Position,@BareRate,@Quantity,@CommitPerc,@Hours,@Multiplier,@BillRate,@Cost);
+                    SELECT CAST(SCOPE_IDENTITY() as int)";
+
+			var id = await connection.QuerySingleAsync<int>(sql, resource);
+
+			return id;
+        }
+
+        public async Task  UpdateProjectPMResource (ProjectResource resource){
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"UPDATE ProjectResources SET Hours = @Hours, Cost = @Cost
+                WHERE Id = @Id";
+
+			await connection.ExecuteAsync(sql, resource);
+        }
+
+        public async Task<int> AddProjectResource (ProjectResource resource)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"INSERT INTO ProjectResources(ProjectId,ResourceId,Name,Position,BareRate,Quantity,CommitPerc)
+                    VALUES(@ProjectId,@ResourceId,@Name,@Position,@BareRate,@Quantity,@CommitPerc);
+                    SELECT CAST(SCOPE_IDENTITY() as int)";
+
+			var id = await connection.QuerySingleAsync<int>(sql, resource);
+
+			return id;
+        }
+
+        public async Task DeleteProjectPMResource(int id)
+		{
+			using var connection = new SqlConnection(connectionString);
+
+			var sql = @"DELETE FROM ProjectResources WHERE Id = @id";
+
+			await connection.ExecuteAsync(sql, new {id});
+		}
+        #endregion
+
+        #region Resources Details
+        public async Task<List<ProjectResourceDetail>> GetResourcesDetailsByProjectId(int ProjectId){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT * FROM ProjectResourcesDetails WHERE ProjectId = @ProjectId;";
+
+            var result = await connection.QueryAsync<ProjectResourceDetail>(sql,new{ProjectId});
+
+            return result.ToList();
+        }
+        #endregion
+
+        #region Additional Costs
+        public async Task<List<AdditionalCost>> GetAdditionalCostsByProjectId(int ProjectId){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT * FROM ProjectAdditionalCosts WHERE ProjectId = @ProjectId;";
+
+            var result = await connection.QueryAsync<AdditionalCost>(sql,new{ProjectId});
+
+            return result.ToList();
+        }
+        public async Task<AdditionalCost> GetAdditionalCostsById(int id){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT * FROM ProjectAdditionalCosts WHERE Id = @id;";
+
+            var result = await connection.QuerySingleOrDefaultAsync<AdditionalCost>(sql,new{id});
+
+            return result;
+        }
+        public async Task<int> AddProjectAdditionalCost (AdditionalCost additionalCost)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"INSERT INTO ProjectAdditionalCosts(Name,Description,Unit,Quantity,ProjectId,CostPerUnit,TotalCost)
+                    VALUES(@Name,@Description,@Unit,@Quantity,@ProjectId,@CostPerUnit,@TotalCost);
+                    SELECT CAST(SCOPE_IDENTITY() as int)";
+
+			var id = await connection.QuerySingleAsync<int>(sql, additionalCost);
+
+			return id;
+        }
+        public async Task DeleteProjectAdditionalCost(int id)
+		{
+			using var connection = new SqlConnection(connectionString);
+
+			var sql = @"DELETE FROM ProjectAdditionalCosts WHERE Id = @id";
+
+			await connection.ExecuteAsync(sql, new {id});
+		}
+        #endregion
+
+
+
+        #region Deliverables
+        public async Task<IEnumerable<ServiceDeliverableCategory>> GetDeliverableCategories(){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT * FROM ServiceDeliverablesCategories ORDER BY Name";
+
+            var result = await connection.QueryAsync<ServiceDeliverableCategory>(sql);
+
+            return result;
+        }
+
+        public async Task<IEnumerable<ServiceDeliverable>> GetServiceDeliverablesByCategoryId(int CategoryId){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT * FROM ServiceDeliverables WHERE CategoryId = @CategoryId ORDER BY Name";
+
+            var result = await connection.QueryAsync<ServiceDeliverable>(sql, new {CategoryId});
+
+            return result;
+        }
+
+
+        public async Task<List<ServiceDeliverable>> GetDeliverablesByCategoryName(string CategoryName)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT s.*,c.Name CategoryName FROM ServiceDeliverables s INNER JOIN ServiceDeliverablesCategories c ON s.CategoryId = c.Id WHERE c.Name = @CategoryName;";
+
+            var result = await connection.QueryAsync<ServiceDeliverable>(sql,new{CategoryName});
+
+            return result.ToList();
+        }
+
+        public async Task<List<ProjectDeliverable>> GetDeliverablesByProjectId(int ProjectId)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT * FROM ProjectDeliverables WHERE ProjectId = @ProjectId ORDER BY PlannedStartDate;";
+
+            var result = await connection.QueryAsync<ProjectDeliverable>(sql,new{ProjectId});
+
+            return result.ToList();
+        }
+
+        public async Task<ProjectDeliverable> GetDeliverableById(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT * FROM ProjectDeliverables WHERE Id = @id;";
+
+            var result = await connection.QuerySingleOrDefaultAsync<ProjectDeliverable>(sql,new{id});
+
+            return result;
+        }
+        
+        public async Task<List<ProjectDeliverableMonthData>> GetDeliverablesMonthDataByProjectId(int ProjectId)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = "sp_ProjectDeliverableMonthData";
+            var parameters = new {
+                ProjectId
+            };
+
+            var result = await connection.QueryAsync<ProjectDeliverableMonthData>(sql,parameters, commandType:CommandType.StoredProcedure);
+
+            return result.ToList();
+        }
+
+        public async Task<int> AddProjectDeliverable(ProjectDeliverable projectDeliverable)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"INSERT INTO ProjectDeliverables (ProjectId,Category,Name,Percentage,Cost,PlannedStartDate,PlannedEndDate,ProgressPercent,IsSubconsultant,SubconsultantPercentage,SubconsultantPercentageCost,TotalCost)
+                    VALUES(@ProjectId,@Category,@Name,@Percentage,@Cost,@PlannedStartDate,@PlannedEndDate,@ProgressPercent,@IsSubconsultant,@SubconsultantPercentage,@SubconsultantPercentageCost,@TotalCost);
+                    SELECT CAST(SCOPE_IDENTITY() as int)";
+
+			var id = await connection.QuerySingleAsync<int>(sql, projectDeliverable);
+
+			return id;
+        }
+
+        public async Task DeleteProjectDeliverable(int id)
+		{
+			using var connection = new SqlConnection(connectionString);
+
+			var sql = @"DELETE FROM ProjectDeliverables WHERE Id = @id";
+
+			await connection.ExecuteAsync(sql, new {id});
+		}
+
+        public async Task UpdateProjectDeliverable(ProjectDeliverable projectDeliverable)
+		{
+			using var connection = new SqlConnection(connectionString);
+
+			var sql = @"UPDATE ProjectDeliverables
+                SET Category = @Category,
+                Name = @Name,
+                Percentage = @Percentage,
+                Cost = @Cost,
+                PlannedStartDate = @PlannedStartDate,
+                PlannedEndDate = @PlannedEndDate,
+                ActualStartDate = @ActualStartDate,
+                ActualEndDate = @ActualEndDate,
+                ProgressPercent = @ProgressPercent,
+                EarnedValue = @EarnedValue,
+                IsSubconsultant = @IsSubconsultant,
+                InvoicedStatus = @InvoicedStatus
+                
+                WHERE Id = @Id";
+
+			await connection.ExecuteAsync(sql, projectDeliverable);
+		}
+
+
+        
+
+        public async Task<List<DesignDiscipline>> GetDesignDisciplinesByProjectId(int ProjectId)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT d.*,di.Name DisciplineName  FROM ProjectDesignDisciplines d INNER JOIN AEDisciplines di ON d.DisciplineId = di.Id WHERE d.ProjectId = @ProjectId;";
+
+            var result = await connection.QueryAsync<DesignDiscipline>(sql,new{ProjectId});
+
+            return result.ToList();
+        }
+        public async Task AddProjectDesignDiscipline(DesignDiscipline designDiscipline){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"INSERT INTO ProjectDesignDisciplines (ProjectId,DisciplineId,SubDisciplineId,Percentage,Cost,Hours)
+                    VALUES(@ProjectId,@DisciplineId,@SubDisciplineId,@Percentage,@Cost,@Hours);";
+
+            await connection.ExecuteAsync(sql, designDiscipline);
+        }
+
+        public async Task DeleteProjectDesignDiscipline(int id)
+		{
+			using var connection = new SqlConnection(connectionString);
+
+			var sql = @"DELETE FROM ProjectDesignDisciplines WHERE Id = @id";
+
+			await connection.ExecuteAsync(sql, new {id});
+		}
+
+        #endregion
+
+        #region Invoices
+        public async Task<int> GetNextInvoiceId(){
+            using var connection = new SqlConnection(connectionString);
+            var sql = "SELECT COUNT(Id) FROM ProjectInvoices";
+            var count = await connection.QueryFirstOrDefaultAsync<int>(sql);
+
+            if(count == 0){
+                return 1;
+            }else{
+                sql = "SELECT IDENT_CURRENT('ProjectInvoices') + IDENT_INCR('ProjectInvoices') AS NextProjectInvoiceId";
+                var id = await connection.QueryFirstOrDefaultAsync<int>(sql);
+                return id;
+            }
+        }
+
+        public async Task<List<ProjectInvoice>> GetInvoicesByProjectId(int ProjectId){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT * FROM ProjectInvoices WHERE ProjectId = @ProjectId ORDER By PeriodStart;";
+
+            var result = await connection.QueryAsync<ProjectInvoice>(sql,new{ProjectId});
+
+            return result.ToList();
+        }
+
+        public async Task<ProjectInvoice> GetProjectInvoiceById(int InvoiceId){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT * FROM ProjectInvoices WHERE Id = @InvoiceId;";
+
+            var result = await connection.QueryFirstOrDefaultAsync<ProjectInvoice>(sql,new{InvoiceId});
+            
+            return result;
+        }
+
+        public async Task<int> AddProjectInvoice(ProjectInvoice projectInvoice){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"INSERT INTO ProjectInvoices (InvoiceNumber,ProjectId,PeriodStart,PeriodEnd,Amount,AmountPaid,AmountCummulative,AmountBalance,Status,Comments,CreatedBy,CreatedDate)
+                    VALUES(@InvoiceNumber,@ProjectId,@PeriodStart,@PeriodEnd,@Amount,@AmountPaid,@AmountCummulative,@AmountBalance,@Status,@Comments,@CreatedBy,@CreatedDate);
+                    SELECT CAST(SCOPE_IDENTITY() as int);";
+
+            var id = await connection.QuerySingleAsync<int>(sql, projectInvoice);
+
+            return id;
+        }
+
+        public async Task DeleteProjectInvoice(int Id){
+            using var connection = new SqlConnection(connectionString);
+
+			var sql = @"DELETE FROM ProjectInvoices WHERE Id = @Id";
+
+			await connection.ExecuteAsync(sql, new {Id});
+        }
+        
+        public async Task UpdateProjectInvoice (ProjectInvoice projectInvoice){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"UPDATE ProjectInvoices SET
+                PeriodStart = @PeriodStart,
+                PeriodEnd = @PeriodEnd,
+                Amount = @Amount,
+                AmountPaid = @AmountPaid,
+                AmountCummulative = @AmountCummulative,
+                AmountBalance = @AmountBalance,
+                Status = @Status,
+                Comments = @Comments
+                WHERE Id = @Id";
+
+            await connection.ExecuteAsync(sql, projectInvoice);
+
+        }
+        
+        public async Task UpdateProjectInvoiceCummulativeByProjectId(int ProjectId, decimal ProjectTotal){
+            using var connection = new SqlConnection(connectionString);
+
+            //Update Invoice Accumulated and Balance
+            var sql = @"WITH AccumulatedAmount AS (
+                SELECT 
+                Id,
+                SUM(Amount) OVER(ORDER BY PeriodStart,Id) AS Commulative
+                FROM ProjectInvoices
+                WHERE ProjectId = @ProjectId
+            )
+            UPDATE ProjectInvoices
+            SET AmountCummulative = AccumulatedAmount.Commulative, AmountBalance = (@ProjectTotal - AccumulatedAmount.Commulative)
+            FROM AccumulatedAmount
+            WHERE ProjectInvoices.Id = AccumulatedAmount.Id;";
+
+            await connection.ExecuteAsync(sql, new {ProjectId, ProjectTotal});
+
+            // //Update Then Project Invoiced Accumulated and Balance
+            sql = @"WITH InvoicedData AS (SELECT COUNT(Id)InvoicesCount,SUM(Amount)Amount,SUM(AmountCummulative)Cummulative FROM ProjectInvoices
+            WHERE ProjectId=@ProjectId)
+            UPDATE Projects
+            SET
+            InvoicedCount = InvoicesCount,
+            InvoicedCummulative = InvoicedData.Amount,
+            InvoicedBalance = Total - InvoicedData.Amount
+            FROM InvoicedData
+            WHERE Projects.Id = @ProjectId";
+            await connection.ExecuteAsync(sql, new {ProjectId});
+        }
+        
+        public async Task<List<ProjectInvoiceDetail>> GetProjectInvoiceDetailsByInvoiceId(int ProjectInvoiceId){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT * FROM ProjectInvoicesDetails
+                WHERE ProjectInvoiceId = @ProjectInvoiceId";
+
+            var result = await connection.QueryAsync<ProjectInvoiceDetail>(sql,new{ProjectInvoiceId});
+
+            return result.ToList();
+        }
+
+        public async Task<ProjectInvoiceDetail> GetProjectInvoiceDetail(int Id){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT * FROM ProjectInvoicesDetails WHERE Id = @Id";
+
+            var result = await connection.QueryFirstOrDefaultAsync<ProjectInvoiceDetail>(sql,new{Id});
+
+            return result;
+        }
+
+        
+        public async Task<int> AddProjectInvoiceDetail(ProjectInvoiceDetail projectInvoiceDetail){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"INSERT INTO ProjectInvoicesDetails (
+                ProjectInvoiceId,
+                Category,
+                Description,
+                Deliverable,
+                DeliverableId,
+                DeliverablePercent,
+                DeliverableTotalCost,
+                IsSubconsultant,
+                SubconsultantPercentage,
+                SubconsultantPercentageCost,
+                Amount)
+                VALUES(
+                @ProjectInvoiceId,
+                @Category,
+                @Description,
+                @Deliverable,
+                @DeliverableId,
+                @DeliverablePercent,
+                @DeliverableTotalCost,
+                @IsSubconsultant,
+                @SubconsultantPercentage,
+                @SubconsultantPercentageCost,
+                @Amount);
+                SELECT CAST(SCOPE_IDENTITY() as int);";
+
+            var id = await connection.QuerySingleAsync<int>(sql, projectInvoiceDetail);
+
+            return id;
+        }
+
+        public async Task DeleteProjectInvoiceDetail(int Id){
+            using var connection = new SqlConnection(connectionString);
+
+			var sql = @"DELETE FROM ProjectInvoicesDetails WHERE Id = @Id";
+
+			await connection.ExecuteAsync(sql, new {Id});
+        }
+
+        #endregion
+
+        #region SubConsultants
+        public async Task<List<ProjectSubConsultant>> GetSubConsultantsByProjectId(int ProjectId)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT * FROM ProjectSubConsultants
+                WHERE ProjectId = @ProjectId
+                ORDER By Date, DeliverableName";
+
+            var result = await connection.QueryAsync<ProjectSubConsultant>(sql,new{ProjectId});
+
+            return result.ToList();
+        }
+
+        public async Task AddProjectSubConsultant(ProjectSubConsultant subConsultant)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"INSERT INTO ProjectSubConsultants (ProjectId,DeliverableName,Name,Cost,Date)
+                    VALUES(@ProjectId,@DeliverableName,@Name,@Cost,@Date);";
+
+			await connection.ExecuteAsync(sql, subConsultant);
+        }
+
+
+        public async Task DeleteProjectSubConsultant(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+			var sql = @"DELETE FROM ProjectSubConsultants WHERE Id = @id";
+
+			await connection.ExecuteAsync(sql, new {id});
+        }
+
+        #endregion
+        
+        #region AEDrawings
+        public async Task<IEnumerable<AEDiscipline>> GetDisciplines(){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT * FROM AEDisciplines Order By Name";
+
+            var result = await connection.QueryAsync<AEDiscipline>(sql);
+
+            return result;
+        }
+
+        public async Task<IEnumerable<AESubDiscipline>> GetSubDisciplinesByDisciplineId(int DisciplineId){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @$"SELECT * FROM AESubDisciplines WHERE AEDisciplineId = {DisciplineId} Order By Name";
+
+            var result = await connection.QueryAsync<AESubDiscipline>(sql);
+
+            return result;
+        }
+
+        public async Task<IEnumerable<AEDrawingTemplate>> GetAEDrawingsTemplates(int disciplineId, int subDisciplineId){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = "";
+            
+            if(subDisciplineId == 0){
+                sql = @$"SELECT * FROM AEDrawingsTemplates WHERE DisciplineId = {disciplineId} Order By PageNumber";
+                
+            }else{
+                sql = @$"SELECT * FROM AEDrawingsTemplates WHERE DisciplineId = {disciplineId} AND SubDisciplineId = {subDisciplineId} Order By PageNumber";
+            }
+            
+            var result = await connection.QueryAsync<AEDrawingTemplate>(sql);
+
+            return result;
+        }
+
+        public async Task<List<ProjectAEDrawing>> GetAEProjectDrawingsByProjectId (int ProjectId){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @$"SELECT pr.*,d.*,s.* FROM ProjectAEDrawings pr
+                    INNER JOIN AEDisciplines d ON pr.DisciplineId = d.Id
+                    LEFT JOIN AESubDisciplines s ON pr.SubDisciplineId = s.Id
+                    WHERE pr.ProjectId = {ProjectId}
+                    ORDER BY d.Id, s.Id";
+
+            var result = await connection.QueryAsync<ProjectAEDrawing,AEDiscipline,AESubDiscipline, ProjectAEDrawing>(sql,(projectAEDrawing, aEDiscipline, aESubDiscipline)=>{
+                projectAEDrawing.AEDiscipline = aEDiscipline;
+                projectAEDrawing.AESubDiscipline = aESubDiscipline;
+
+                return projectAEDrawing;
+            },splitOn:"Id, Id");
+            
+            // var sql = @$"SELECT pr.*, dr.*,d.*,s.* FROM ProjectAEDrawings pr
+            //         INNER JOIN AEDrawings dr ON pr.AEDrawingId = dr.Id
+            //         INNER JOIN AEDisciplines d ON dr.DisciplineId = d.Id
+            //         LEFT JOIN AESubDisciplines s ON dr.SubDisciplineId = s.Id
+            //         WHERE pr.ProjectId = {ProjectId}
+            //         ORDER BY d.Id, s.Id, pr.AEDrawingId;";
+
+            // var result = await connection.QueryAsync<ProjectAEDrawing,AEDrawing,AEDiscipline,AESubDiscipline, ProjectAEDrawing>(sql,(projectAEDrawing, aEDrawing, aEDiscipline, aESubDiscipline)=>{
+            //     aEDrawing.AEDiscipline = aEDiscipline;
+            //     aEDrawing.AESubDiscipline = aESubDiscipline;
+            //     projectAEDrawing.AEDrawing = aEDrawing;
+
+            //     return projectAEDrawing;
+            // },splitOn:"Id,Id,Id");
+
+            return result.ToList();
+        }
+        
+        public async Task AddProjectAEDrawing(ProjectAEDrawing aeDrawing)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"INSERT INTO ProjectAEDrawings (ProjectId,DisciplineId,SubDisciplineId,PageNumber,PageTitle,ResourceName,Hours,Rate,Multiplier,BillingRate,TotalCost)
+                    VALUES(@ProjectId,@DisciplineId,@SubDisciplineId,@PageNumber,@PageTitle,@ResourceName,@Hours,@Rate,@Multiplier,@BillingRate,@TotalCost);";
+
+			await connection.ExecuteAsync(sql, aeDrawing);
+        }
+
+        public async Task DeleteProjectAEDrawing(int Id)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"DELETE FROM ProjectAEDrawings WHERE Id = @Id;";
+
+			await connection.ExecuteAsync(sql,new {Id});
+        }
+
+        #endregion
+
+        #region Timesheets
+        public async Task<List<ProjectJobTimesheet>> GetTimesheetsDataByShortCode(string ShortCode)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT 
+                j.Name JobName,
+                (u.FirstName + ' ' + u.LastName) FullName,
+                (SUM(t.Duration)/3600.0) Hours,
+                u.PayRate,
+                u.PayRate * (SUM(t.Duration) / 3600.0) Cost
+                FROM Projects p
+                INNER JOIN ProjectJobs j on j.ShortCode = p.ShortCode
+                INNER JOIN ProjectJobsTimesheets t on t.JobCodeId = j.JobCodeId
+                LEFT JOIN ProjectUsers u on u.UserId = t.UserId
+                WHERE p.ShortCode = @ShortCode
+                GROUP BY j.JobCodeId,j.Name,u.UserId,u.FirstName,u.LastName,u.PayRate;";
+
+            var result = await connection.QueryAsync<ProjectJobTimesheet>(sql,new{ShortCode});
+
+            return result.ToList();
+        }
+        public async Task<List<ProjectJobTimesheetsMonthData>> GetTimesheetsMonthDataByShortCode(string ShortCode)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT 
+                YEAR(t.Date) AS Year, 
+                MONTH(t.Date) AS Month, 
+                DATENAME(month, DATEADD(month, MONTH(t.Date)-1, '1900-01-01')) AS MonthName,
+                CASE 
+                    WHEN MONTH(t.Date) = 1 THEN CONCAT('Jan','-',YEAR(t.Date))
+                    WHEN MONTH(t.Date) = 2 THEN CONCAT('Feb','-',YEAR(t.Date))
+                    WHEN MONTH(t.Date) = 3 THEN CONCAT('Mar','-',YEAR(t.Date))
+                    WHEN MONTH(t.Date) = 4 THEN CONCAT('Apr','-',YEAR(t.Date))
+                    WHEN MONTH(t.Date) = 5 THEN CONCAT('May','-',YEAR(t.Date))
+                    WHEN MONTH(t.Date) = 6 THEN CONCAT('Jun','-',YEAR(t.Date))
+                    WHEN MONTH(t.Date) = 7 THEN CONCAT('Jul','-',YEAR(t.Date))
+                    WHEN MONTH(t.Date) = 8 THEN CONCAT('Aug','-',YEAR(t.Date))
+                    WHEN MONTH(t.Date) = 9 THEN CONCAT('Sep','-',YEAR(t.Date))
+                    WHEN MONTH(t.Date) = 10 THEN CONCAT('Oct','-',YEAR(t.Date))
+                    WHEN MONTH(t.Date) = 11 THEN CONCAT('Nov','-',YEAR(t.Date))
+                    WHEN MONTH(t.Date) = 12 THEN CONCAT('Dec','-',YEAR(t.Date))
+                END AS MonthNameAbbr,
+                SUM((t.Duration/3600.0)*u.PayRate) TSheetCost,
+                SUM(SUM((t.Duration/3600.0)*u.PayRate)) OVER (ORDER BY YEAR(t.Date), MONTH(t.Date)) AS TsheetCostAcc
+
+                FROM ProjectJobsTimesheets t
+                INNER JOIN ProjectJobs j ON j.JobCodeId = t.JobCodeId
+                INNER JOIN Projects p ON p.ShortCode = j.ShortCode
+                LEFT JOIN ProjectUsers u ON u.UserId = t.UserId
+                WHERE j.ShortCode = @ShortCode
+                GROUP BY YEAR(t.Date), MONTH(t.Date)
+                ORDER BY Year, Month";
+
+            var result = await connection.QueryAsync<ProjectJobTimesheetsMonthData>(sql,new{ShortCode});
+
+            return result.ToList();
+        }
+        #endregion
+
+        #region Statistics
+        public async Task UpdateProjectStatistics(int projectId){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = "sp_UpdateProjectStatistics";
+            var parameters = new {
+                projectId
+            };
+
+			await connection.ExecuteAsync(sql,parameters, commandType:CommandType.StoredProcedure);
+        }
+
+        public async Task<List<ProjectAnalysis>> GetProjectAnalysis(int projectId){
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = "sp_GetProjectAnalysis";
+            var parameters = new {
+                projectId
+            };
+
+			var projectAnalysis = await connection.QueryAsync<ProjectAnalysis>(sql,parameters, commandType:CommandType.StoredProcedure);
+            return projectAnalysis.ToList();
+        }
+        #endregion
+    }
+}

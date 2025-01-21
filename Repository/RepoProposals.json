@@ -1,0 +1,3858 @@
+﻿// using Dapper;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Data.SqlClient;
+// using Newtonsoft.Json;
+using ErpApi.Models.Business;
+using ErpApi.Models.BusinessResources;
+using ErpApi.Models.ClientsVendors;
+using ErpApi.Models.Projects;
+using ErpApi.Models.Projects.Projects;
+using ErpApi.Models.Projects.Proposals;
+using System.Diagnostics;
+// using static SkiaSharp.HarfBuzz.SKShaper;
+
+
+namespace STG_ERP.Services
+{
+    #region Interface
+
+    public interface IRepoProposals
+    {
+        #region Proposals Interfaces
+
+        Task<int> GetNextId();
+        Task<int> CreateProposal(Proposal proposal);
+        Task<Proposal> GetProposalById(int id);
+        Task<IEnumerable<Proposal>> GetActiveProposals();
+        Task<IEnumerable<Proposal>> GetProposals();
+
+        Task<(List<Proposal>, int totalCount)> GetAllProposalsPages(string searchKeyword, int pageNumber, int pageSize,
+            string serviceType, string sectorCategory);
+
+        Task<IEnumerable<ProposalCreateEditViewModel>> GetProposalsOverview();
+        Task<ProposalCreateEditViewModel> GetProposalDetailOverview(int Id);
+        Task<IEnumerable<ProposalCreateEditViewModel>> GetAllProposalsAsync();
+        Task UpdateProposal(Proposal proposal);
+        Task UpdateProposalTotalCost(int proposalId, decimal? proposalTotal);
+        Task UpdateProposalProjectId(int proposalId, int projectId);
+        Task<int> DeleteProposal(int id);
+        Task<ProposalDashboardViewModel> GetDashboardData();
+
+        Task<Dictionary<string, Dictionary<string, int>>> GetFilteredProposalGenerationByMonth(DateTime? startDate,
+            DateTime? endDate);
+
+        Task<(int ApprovedProposals, int GeneratedProposals)> GetFilteredProposaGenerationVsApprovalByMonth(
+            DateTime? startDate, DateTime? endDate);
+
+        Task<Dictionary<string, decimal>> GetFilteredDeliverablesCost(List<string> deliverables, DateTime? startDate,
+            DateTime? endDate);
+
+        Task<Dictionary<string, decimal>> GetFilteredSectorEarnings(List<string> sectors, DateTime? startDate,
+            DateTime? endDate);
+
+        Task<Dictionary<string, decimal>> GetFilteredProjectTypeDistribution(List<string> projectTypes,
+            DateTime? startDate, DateTime? endDate);
+
+        Task<Dictionary<string, decimal>> GetFilteredComplexityCost(List<string> complexities, DateTime? startDate,
+            DateTime? endDate);
+
+        Task<Dictionary<string, decimal>> GetFilteredClientBudgets(List<string> clients, DateTime? startDate,
+            DateTime? endDate);
+
+        Task<Dictionary<string, List<Dictionary<string, decimal>>>> GetFilteredResourceCommitment(
+            List<string> resources, DateTime? startDate, DateTime? endDate);
+
+        #endregion
+
+        #region ProposalType Interfaces
+
+        Task<IEnumerable<ProposalType>> GetProposalTypes();
+        Task<ProposalType> GetProposalTypeById(int id);
+        Task<ProposalType> GetProposalTypeByProposalId(int id);
+        Task<ProposalType> GetProposalTypeByName(string name);
+
+        #endregion ProposalType Interfaces
+
+        #region ProjectType Interfaces
+
+        Task<IEnumerable<ProjectType>> GetProjectTypes();
+        Task<ProjectType> GetProjectTypeById(int id);
+        Task<ProjectType> GetProjectTypeByProposalId(int id);
+        Task<ProjectType> GetProjectTypeByName(string name);
+
+        #endregion ProjectType Interfaces
+
+        #region Status Interfaces
+
+        Task<int> CreateProposalStatus(ProposalStatus proposalStatus);
+        Task UpdateProposalStatus(int proposalId, int proposalStatusId);
+        Task<IEnumerable<StatusOption>> GetStatusOptions();
+        Task<StatusOption> GetStatusOptionByName(string name);
+        Task<StatusOption> GetStatusOptionById(int Id);
+
+        #endregion
+
+        #region ServiceType Interfaces
+
+        Task<IEnumerable<ServiceType>> GetServiceTypes();
+        Task<ServiceType> GetServiceTypeById(int id);
+        Task<ServiceType> GetServiceTypeByProposalId(int id);
+        Task<ServiceType> GetServiceTypeByName(string name);
+
+        #endregion ServiceType Interfaces
+
+        #region ServiceDeliverable Interfaces
+
+        Task<IEnumerable<ServiceDeliverable>> GetAllServiceDeliverables();
+
+        #endregion ServiceDeliverable Interfaces
+
+        #region Complexity Interfaces
+
+        Task<IEnumerable<Complexity>> GetComplexities();
+        Task<Complexity> GetComplexityById(int id);
+        Task<Complexity> GetComplexityByProposalId(int id);
+        Task<Complexity> GetComplexityByName(string name);
+
+        #endregion Complexity Interfaces
+
+        #region Impact Interfaces
+
+        Task<IEnumerable<Impact>> GetImpacts();
+        Task<Impact> GetImpactById(int id);
+        Task<Impact> GetImpactByName(string name);
+        Task<Impact> GetImpactByProposalId(int id);
+
+        #endregion Impact Interfaces
+
+        #region Proposal Resource Interfaces
+
+        Task<List<ProjectResource>> GetAllProposalResources();
+        Task<List<ProjectResource>> GetBusinessResourcesByProposalId(int ProposalId);
+
+        #endregion
+
+        #region Status Interfaces
+
+        Task<IEnumerable<StatusOption>> GetProposalStatusLogs();
+        Task<ProposalStatus> GetProposalStatusById(int id);
+        Task<ProposalStatus> GetProposalStatusByProposalId(int ProposalId);
+        Task<ProposalStatus> GetProposalStatusByName(string name);
+
+        #endregion Status Interfaces
+
+        #region Phase Interfaces
+
+        Task<IEnumerable<Phase>> GetPhases();
+
+        #endregion Phase Interfaces
+
+        #region Proposal Format Interfaces
+
+        Task<List<ProposalFormat>> GetProposalFormats();
+        Task<ProposalFormat> GetProposalFormatById(int id);
+        Task<ProposalFormat> GetProposalFormatByProposalId(int id);
+        Task<ProposalFormat> GetProposalFormatByName(string Name);
+        Task<IEnumerable<SelectListItem>> GetFormatOptionsByServiceType(int serviceTypeId);
+
+        #endregion Proposal Format Interfaces
+
+        #region Project Resources
+
+        #region Proposal Resources Create
+
+        Task<int> CreateProposalResources(ProjectResource resources);
+
+        #endregion Project Resources Create
+
+        #region Project Resouces Read
+
+        Task<List<ProjectResource>> GetResourcesByProposalId(int id);
+        Task<List<ProjectResource>> GetResourcesByProposalIdOverview(int id);
+
+        #endregion Project Resouces Read
+
+        #region Project Resources Update
+
+        Task<ProjectResource> UpdateProposalResource(ProjectResource resource);
+
+        #endregion Project Resources Update
+
+        #endregion Project Resources
+
+        #region Proposal AdditionalItems
+
+        Task<int> CreateAdditionalCosts(AdditionalCost additionalCost);
+        Task<List<AdditionalCost>> GetAdditionalCostsByProposalId(int proposalId);
+        Task<AdditionalCost> UpdateAdditionalCost(AdditionalCost additionalCosts);
+        Task<int> DeleteProposalResource(int id);
+        Task<int> DeleteAdditionalCost(int Id);
+
+        #endregion Proposal AdditionalItems
+
+
+        #region Proposal Discipline Percentages
+
+        Task<int> CreateProposalDisciplinePercentage(DisciplinePercent disciplinePercent, int proposalId, int projectId,
+            decimal? potentialProposalCost, decimal? potentialHrlRate);
+
+        Task<int> CreateProposalDisciplinePercentage(DisciplinePercent disciplinePercent);
+        Task<int> CreateProposalDisciplinePercentageArchDrafter(DisciplinePercent disciplinePercent);
+        Task<int> CreateProposalSubDisciplinePercent(SubDisciplinePercent subDisciplinePercent);
+        Task<int> CreateSubDisciplinePercentResources(ProjectResource subDisciplineResource);
+        Task<List<DisciplinePercent>> GetDisciplinePercentsByProposalId(int proposalId);
+        Task<DisciplinePercent> GetDisciplinePercentById(int id);
+
+        Task<DisciplinePercent> UpdateDisciplinePercent(DisciplinePercent disciplinePercent, decimal? potentialCost,
+            decimal? potentialTotalHours);
+
+        Task UpdateDisciplinePercent(DisciplinePercent disciplinePercent);
+        Task<int> DeleteDeliverable(int id);
+        Task<List<DisciplinePercent>> GetDisciplinePercentsByProposalIdOverview(int proposalId);
+        Task<IEnumerable<Discipline>> GetAEDisciplines();
+        Task<IEnumerable<Discipline>> GetAESubDisciplinesByDisciplineId(int disciplineId);
+        Task<IEnumerable<Discipline>> GetAESubDisciplinesByDisciplineName(string AEDisciplineName);
+
+        Task<IEnumerable<SubDisciplinePercent>>
+            GetAESubDisciplinePercentsByDisciplinePercentId(int disciplinePercentId);
+
+        Task<IEnumerable<ProjectResource>> GetAESubDisciplinePercentResourcesBySubDisciplinePercentId(
+            int subDisciplinePercentId);
+
+        #endregion Proposal Discipline Percentages
+
+        #region Proposal Deliverables
+
+        Task<int> CreateProposalDeliverable(ProjectDeliverable deliverable);
+        Task UpdateProposalDeliverable(ProjectDeliverable deliverable);
+        public Task<List<ProjectDeliverable>> GetProposalDeliverablesByProposalId(int Id);
+
+        #endregion Proposal Deliverables
+
+        #region Proposal Dashboard
+
+        Task<Dictionary<string, int>> GetProposalStatusCounts();
+        Task<List<KeyValuePair<string, int>>> GetProposalsGeneratedByMonthCounts();
+
+        Task<Dictionary<string, int>> GetFilteredProposalSectorDistribution(DateTime? startDate, DateTime? endDate,
+            List<string> sectors);
+
+        Task<Dictionary<string, Dictionary<string, decimal>>> GetPmBareVsBillRate(List<string> positions,
+            DateTime? startDate, DateTime? endDate);
+
+        #endregion Proposal Dashboard
+
+        #region Proposal to Project Conversion
+
+        Task<int> CreateProjectFromProposal(Proposal proposal);
+        public Task<int> CreateAEProjectFromProposal(Proposal proposal);
+
+        #endregion Proposal to Project Conversion
+
+        #region Proposal Phases
+
+        Task<int> CreateProposalPhase(ProposalPhase proposalPhase);
+        Task<ProposalPhase> GetProposalPhaseById(int proposalServiceDeliverableId);
+        Task<List<ProposalPhase>> GetProposalPhasesByProposalId(int proposalId);
+
+        #endregion Proposal Phases
+
+        #region Billing Styles
+
+        Task<int> CreateProposalBilling(Proposal proposal);
+        Task<BillingStyle> GetBillingStyleById(int billingStyleId);
+        Task<BillingStyle> GetBillingStyleByProposalId(int proposalId);
+        Task<BillingStyle> GetBillingStyleByName(string Name);
+        Task<IEnumerable<BillingStyle>> GetBillingStyles();
+
+        #endregion Billing Styles
+
+        #region RELOCATE ME
+
+        Task<IEnumerable<AEDrawing>> GetDrawingsByDisciplineAndSubDiscipline(int disciplineId, int? subDisciplineId);
+        Task<AEDrawing> GetAEDrawingDetails(int drawingId);
+        Task<IEnumerable<SubDisciplinePercent>> GetSubDisciplinePercentsById(int id);
+        Task<SubDisciplinePercent> GetSubDisciplinePercentById(int id);
+        Task<int> CreateSubDisciplinePercent(SubDisciplinePercent subDisciplinePercent);
+        Task UpdateSubDisciplinePercent(SubDisciplinePercent subDisciplinePercent);
+        Task DeleteSubDisciplinePercent(int id);
+
+        Task<IEnumerable<ProposalDisciplinePercentDrawing>> GetProposalDisciplinePercentDrawings(
+            int subDisciplinePercentId);
+
+        Task<ProposalDisciplinePercentDrawing> GetProposalDisciplinePercentDrawingById(int id);
+        Task<int> CreateProposalDisciplinePercentDrawing(ProposalDisciplinePercentDrawing drawing);
+        Task UpdateProposalDisciplinePercentDrawing(ProposalDisciplinePercentDrawing drawing);
+        Task DeleteProposalDisciplinePercentDrawing(int id);
+
+        Task<Title> GetPositionNameById(int id);
+        Task<List<ProjectDeliverable>> GetProposalDeliverablesByProposalIdOverview(int proposalId);
+        Task<SectorCategory> GetSectorCategoryByName(string Name);
+
+        #endregion RELOCATE ME
+    }
+
+    #endregion
+
+    public class RepoProposals : IRepoProposals
+    {
+        private readonly string connectionString;
+
+        public RepoProposals(IConfiguration configuration)
+        {
+            connectionString = configuration.GetConnectionString("DefaultConnection");
+        }
+
+
+        #region Proposals
+
+        #region Proposal Create
+
+        public async Task<int> CreateProposal(Proposal proposal)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            try
+            {
+                var proposalInsertSql = @"
+										INSERT INTO Proposals (
+											Number,
+											ProjectName,
+											ProposalDate,
+                                            DateCreated,
+                                            CreatedBy,
+											Description,
+											Duration,
+											ProposalFormatId,
+											ClientId,
+											SectorId,
+                                            SectorCategoryId,
+											ProposalTypeId,
+											ProjectTypeId,
+											ServiceTypeId,
+											ComplexityId,
+											ImpactId,
+											PotentialHrRate,
+											PotentialAECostTotal,
+                                            PotentialDesignFee,
+											Total,
+											EngPercentStd,
+											BillingStyleId,
+                                            IndirectPercentage,
+                                            IndirectCost,
+                                            IndirectCostComment,
+                                            ConstructionSupportPercentage,
+                                            ConstructionSupportCost,
+                                            ConstructionSupportHrRate,
+                                            ConstructionSupportHrs,
+                                            ConstructionSupportComment,
+                                            SupervisionWeekHrs,
+                                            SupervisionHrRate,
+                                            SupervisionCost,
+                                            IsB2B,
+                                            B2BCost
+                                            )
+										VALUES (
+											@Number,
+											@ProjectName,
+											@ProposalDate,
+                                            @DateCreated,
+                                            @CreatedBy,
+											@Description,
+											@Duration,
+											@ProposalFormatId,
+											@ClientId,
+											@SectorId,
+                                            @SectorCategoryId,
+											@ProposalTypeId,
+											@ProjectTypeId,
+											@ServiceTypeId,
+											@ComplexityId,
+											@ImpactId,
+											@PotentialHrRate,
+											@PotentialAECostTotal,
+                                            @PotentialDesignFee,
+											@Total,
+											@EngPercentStd,
+											@BillingStyleId,
+                                            @IndirectPercentage,
+                                            @IndirectCost,
+                                            @IndirectCostComment,
+                                            @ConstructionSupportPercentage,
+                                            @ConstructionSupportCost,
+                                            @ConstructionSupportHrRate,
+                                            @ConstructionSupportHrs,
+                                            @ConstructionSupportComment,
+                                            @SupervisionWeekHrs,
+                                            @SupervisionHrRate,
+                                            @SupervisionCost,
+                                            @IsB2B,
+                                            @B2BCost
+                                            )
+										SELECT CAST(SCOPE_IDENTITY() AS int);
+										";
+
+
+                var proposalId = await connection.QuerySingleAsync<int>(proposalInsertSql, proposal);
+
+                // Assume you have a method to insert the default status for the new proposal
+                //await InsertDefaultProposalStatus(proposalId, connection, transaction);
+
+                return proposalId;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Service Error: {ex.Message}");
+                return -1;
+            }
+        }
+
+        #endregion
+
+        #region Proposal Read
+
+        public async Task<int> GetNextId()
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var sql = @"SELECT COUNT(Id) FROM Proposals;";
+                var count = await connection.QueryFirstOrDefaultAsync<int>(sql);
+
+                if (count == 0)
+                {
+                    return -1;
+                }
+                else
+                {
+                    sql = "SELECT IDENT_CURRENT('Proposals') + IDENT_INCR('Proposals') AS NextProposalId";
+
+                    var nextId = await connection.QuerySingleAsync<int>(sql);
+                    return nextId;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Service Error fetching available proposal Id: {ex.Message}");
+                return -1;
+            }
+        }
+
+        public async Task<Proposal> GetProposalById(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"
+			SELECT *
+			FROM Proposals WHERE Id = @Id";
+
+
+            var result = await connection.QueryFirstOrDefaultAsync<Proposal>(sql, new { Id = id });
+
+            return result;
+        }
+
+        public async Task<IEnumerable<Proposal>> GetActiveProposals()
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"
+					SELECT * 
+					FROM dbo.Proposals 
+					WHERE ProposalStatusId = (SELECT Id FROM dbo.ProposalStatusLogs WHERE ProposalStatusName = 'Active')";
+            return await connection.QueryAsync<Proposal>(sql);
+        }
+
+        public async Task<IEnumerable<ProposalCreateEditViewModel>> GetAllProposalsAsync()
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                var sql = @"
+            SELECT 
+					p.Id, 
+					p.Number, 
+					p.ProjectName, 
+					p.ProposalDate, 
+					p.Description, 
+					p.Duration, 
+                    p.ProjectId,
+					pt.Name AS ProposalTypeName, 
+					prt.Name AS ProjectTypeName,
+					c.Name AS ClientName, 
+					s.Name AS SectorName, 
+					st2.Name AS StatusName
+				FROM Proposals p
+				LEFT JOIN ProposalTypes pt ON p.ProposalTypeId = pt.Id
+				LEFT JOIN ProjectTypes prt ON p.ProjectTypeId = prt.Id
+				LEFT JOIN ClientsVendors c ON p.ClientId = c.Id
+				LEFT JOIN Sectors s ON p.SectorId = s.Id
+				LEFT JOIN ProposalStatusLogs st ON p.ProposalStatusId = st.Id
+				LEFT JOIN ProposalStatuses st2 ON st.StatusId = st2.Id
+        ";
+
+                var proposalDictionary = new Dictionary<int, ProposalCreateEditViewModel>();
+
+                var proposals = await connection
+                    .QueryAsync<Proposal, string, string, string, string, string, ProposalCreateEditViewModel>(
+                        sql,
+                        (proposal, proposalTypeName, projectTypeName, clientName, sectorName, statusName) =>
+                        {
+                            ProposalCreateEditViewModel viewModel;
+                            if (!proposalDictionary.TryGetValue(proposal.Id, out viewModel))
+                            {
+                                viewModel = new ProposalCreateEditViewModel
+                                {
+                                    Proposal = proposal,
+                                    // Initialize other properties if needed
+                                };
+                                proposalDictionary.Add(viewModel.Proposal.Id, viewModel);
+                            }
+
+                            // Assuming you have properties for these names in your ViewModel
+                            viewModel.ProposalTypeName = proposalTypeName;
+                            viewModel.ProjectTypeName = projectTypeName;
+                            viewModel.ClientName = clientName;
+                            viewModel.SectorName = sectorName;
+                            viewModel.StatusName = statusName;
+
+                            return viewModel;
+                        },
+                        splitOn: "ProposalTypeName,ProjectTypeName,ClientName,SectorName,StatusName"
+                    );
+
+                // The `Distinct()` method is called after the task has completed
+                return proposals.Distinct().ToList();
+            }
+        }
+
+        public async Task<IEnumerable<Proposal>> GetProposals()
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"
+					SELECT *
+					FROM Proposals 
+					WHERE 1 = 1";
+            var proposals = await connection.QueryAsync<Proposal>(sql);
+            foreach (var proposal in proposals)
+            {
+                try
+                {
+                    proposal.Client = await GetClientByProposalId(proposal.Id);
+                    proposal.ProposalType = await GetProposalTypeByProposalId(proposal.Id);
+                    proposal.ServiceType = await GetServiceTypeByProposalId(proposal.Id);
+                    proposal.Complexity = await GetComplexityByProposalId(proposal.Id);
+                    proposal.Impact = await GetImpactByProposalId(proposal.Id);
+                    proposal.ProjectType = await GetProjectTypeByProposalId(proposal.Id);
+                    proposal.Sector = await GetSectorByProposalId(proposal.Id);
+                    proposal.ProposalStatus = await GetProposalStatusByProposalId(proposal.Id);
+                }
+                catch (Exception ex)
+                {
+                    throw new System.Data.DataException("An error occurred while fetching report data.", ex);
+                }
+            }
+
+
+            return proposals;
+        }
+
+
+        //FIXME: CRITICAL Adapt this to proposal, not projects
+        public async Task<(List<Proposal>, int totalCount)> GetAllProposalsPages(string searchKeyword, int pageNumber,
+            int pageSize, string serviceType, string sectorCategory)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @$"SELECT p.*,ps.*,pt.*,s.*,sc.*,c.* FROM Proposals p 
+                LEFT JOIN ServiceTypes s ON p.ServiceTypeId = s.Id
+                LEFT JOIN ProposalTypes ps ON p.ProposalTypeId = ps.Id
+                LEFT JOIN ProjectTypes pt ON p.ProjectTypeId = pt.Id
+                LEFT JOIN SectorCategories sc ON p.SectorCategoryId = sc.Id
+                LEFT JOIN ClientsVendors c ON p.ClientId = c.Id
+                WHERE p.ProjectName LIKE '%{searchKeyword}%' AND s.Name LIKE '%{serviceType}%' AND sc.Name LIKE '%{sectorCategory}%'
+                ORDER BY p.ProposalDate DESC
+                OFFSET {(pageNumber - 1) * pageSize} ROWS
+                FETCH NEXT {pageSize}
+                ROWS ONLY;";
+
+            try
+            {
+                var result =
+                    await connection
+                        .QueryAsync<Proposal, ProposalType, ProjectType, ServiceType, SectorCategory, ClientVendor,
+                            Proposal>(sql,
+                            map: (proposal, proposalType, projecttype, serviceType, sectorCategory, client) =>
+                            {
+                                proposal.Client = client;
+                                proposal.ProposalType = proposalType;
+                                proposal.ProjectType = projecttype;
+                                proposal.SectorCategory = sectorCategory;
+                                proposal.ServiceType = serviceType;
+                                return proposal;
+                            },
+                            splitOn: "Id,Id,Id");
+                var sqlRecordsCount = @$"SELECT COUNT(p.Id) FROM Proposals p
+                LEFT JOIN ServiceTypes s ON p.ServiceTypeId = s.Id
+                LEFT JOIN ProposalTypes ps ON p.ProposalTypeId = ps.Id
+                LEFT JOIN ProjectTypes pt ON p.ProjectTypeId = pt.Id
+                LEFT JOIN SectorCategories sc ON p.SectorCategoryId = sc.Id
+                LEFT JOIN ClientsVendors c ON p.ClientId = c.Id
+                WHERE p.ProjectName LIKE '%{searchKeyword}%' AND s.Name LIKE '%{serviceType}%' AND sc.Name LIKE '%{sectorCategory}%';";
+
+                var recordsCount = await connection.ExecuteScalarAsync<int>(sqlRecordsCount);
+
+                return (result.ToList(), recordsCount);
+            }
+            catch (SqlException ex)
+            {
+                // Handle specific SQL errors or rethrow a custom exception
+                Console.WriteLine($"SQL Error: {ex.Message}");
+                throw new ApplicationException("A database error occurred fetching proposal list data.", ex);
+            }
+            catch (Exception ex)
+            {
+                // Handle other exceptions or rethrow a generic exception
+                Console.WriteLine($"General Error: {ex.Message}");
+                throw new ApplicationException("A database error occurred fetching proposal list data.", ex);
+            }
+        }
+
+        public async Task<IEnumerable<ProposalCreateEditViewModel>> GetProposalsOverview()
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"
+					WITH LatestStatus AS (
+					SELECT 
+						ps.Id,
+						ps.DateChanged,
+						ps.ProposalId,
+						ps.StatusId,
+						s.Name AS StatusString,
+						ROW_NUMBER() OVER (PARTITION BY ps.ProposalId ORDER BY ps.DateChanged DESC, ps.Id DESC) AS rn
+					FROM 
+						ProposalStatusLogs ps
+					LEFT JOIN 
+						ProposalStatuses s ON ps.StatusId = s.Id
+				)
+				SELECT
+					p.Id AS 'ProposalId',
+					p.Number AS 'ProjectNumber',
+					p.ProjectName AS 'ProjectName',
+					FORMAT(p.ProposalDate, 'yyyy-MM-dd') AS ProposalDateString,
+					p.Description AS 'ProposalDescription',
+					p.Duration AS 'ProposalDuration',
+					c.Name AS 'ClientName',  -- Assuming Client table has a column 'ClientName'
+					s.Name AS 'SectorName',  -- Assuming Sector table has a column 'SectorName'
+					pt.Name AS 'ProposalTypeName',  -- Assuming ProposalType table has a column 'TypeName'
+					projt.Name AS 'ProjectTypeName',  -- Assuming ProjectType table has a column 'TypeName'
+					st.Name AS 'ServiceTypeName',  -- Assuming ServiceType table has a column 'TypeName'
+					comp.Name AS 'ComplexityName',  -- Assuming Complexity table has a column 'Level'
+					imp.Name AS 'ImpactName',  -- Assuming Impact table has a column 'ImpactScale'
+					ls.StatusString AS 'ProposalStatus',  -- Latest status from the ProposalStatuses table
+					p.Total AS 'ProposalTotal'
+				FROM 
+					Proposals p
+				LEFT JOIN 
+					ClientsVendors c ON p.ClientId = c.Id
+				LEFT JOIN 
+					SectorCategories s ON p.SectorCategoryId = s.Id
+				LEFT JOIN 
+					ProposalTypes pt ON p.ProposalTypeId = pt.Id
+				LEFT JOIN 
+					ProjectTypes projt ON p.ProjectTypeId = projt.Id
+				LEFT JOIN 
+					ServiceTypes st ON p.ServiceTypeId = st.Id
+				LEFT JOIN 
+					Complexities comp ON p.ComplexityId = comp.Id
+				LEFT JOIN 
+					Impacts imp ON p.ImpactId = imp.Id
+				LEFT JOIN 
+					LatestStatus ls ON p.Id = ls.ProposalId AND ls.rn = 1;
+				";
+            try
+            {
+                return await connection.QueryAsync<ProposalCreateEditViewModel>(sql);
+            }
+            catch (SqlException ex)
+            {
+                // Handle specific SQL errors or rethrow a custom exception
+                Console.WriteLine($"SQL Error: {ex.Message}");
+                throw new ApplicationException("A database error occurred during excel file generation.", ex);
+            }
+            catch (Exception ex)
+            {
+                // Handle other exceptions or rethrow a generic exception
+                Console.WriteLine($"General Error: {ex.Message}");
+                throw new ApplicationException("A database error occurred during excel file generation.", ex);
+            }
+        }
+
+        public async Task<ProposalCreateEditViewModel> GetProposalDetailOverview(int Id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"
+					WITH LatestStatus AS (
+    SELECT 
+        ps.Id,
+        ps.DateChanged,
+        ps.ProposalId,
+        ps.StatusId,
+        s.Name AS StatusString,
+        ROW_NUMBER() OVER (PARTITION BY ps.ProposalId ORDER BY ps.DateChanged DESC, ps.Id DESC) AS rn
+    FROM 
+        ProposalStatusLogs ps
+    LEFT JOIN 
+        ProposalStatuses s ON ps.StatusId = s.Id
+)
+SELECT
+    p.Id AS 'ProposalId',
+    p.Number AS 'ProjectNumber',
+    p.ProjectName AS 'ProjectName',
+    FORMAT(p.ProposalDate, 'yyyy-MM-dd') AS ProposalDateString,
+    p.Description,
+    p.Duration,
+    c.Name AS ClientName,
+    s.Name AS SectorName,
+    pt.Name AS ProposalTypeName,
+    projt.Name AS ProjectTypeName,
+    st.Name AS ServiceTypeName,
+    comp.Name AS ComplexityName,
+    imp.Name AS ImpactName,
+    ls.StatusString AS StatusName,  -- Latest status from the ProposalStatuses table
+    p.Total
+FROM 
+    Proposals p
+LEFT JOIN 
+    ClientsVendors c ON p.ClientId = c.Id
+LEFT JOIN 
+    SectorCategories s ON p.SectorCategoryId = s.Id
+LEFT JOIN 
+    ProposalTypes pt ON p.ProposalTypeId = pt.Id
+LEFT JOIN 
+    ProjectTypes projt ON p.ProjectTypeId = projt.Id
+LEFT JOIN 
+    ServiceTypes st ON p.ServiceTypeId = st.Id
+LEFT JOIN 
+    Complexities comp ON p.ComplexityId = comp.Id
+LEFT JOIN 
+    Impacts imp ON p.ImpactId = imp.Id
+LEFT JOIN 
+    LatestStatus ls ON p.Id = ls.ProposalId AND ls.rn = 1
+WHERE 
+    p.Id = @Id;
+				";
+            try
+            {
+                return await connection.QueryFirstOrDefaultAsync<ProposalCreateEditViewModel>(sql, new { Id = Id });
+            }
+            catch (SqlException ex)
+            {
+                // Handle specific SQL errors or rethrow a custom exception
+                Console.WriteLine($"SQL Error: {ex.Message}");
+                throw new ApplicationException("A database error occurred during the update operation.", ex);
+            }
+            catch (Exception ex)
+            {
+                // Handle other exceptions or rethrow a generic exception
+                Console.WriteLine($"General Error: {ex.Message}");
+                throw new ApplicationException("An error occurred during the update operation.", ex);
+            }
+        }
+
+        #endregion
+
+        #region Proposal Update
+
+        public async Task UpdateProposal(Proposal proposal)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"
+                UPDATE Proposals
+                SET Number = @Number,
+                    ProjectName = @ProjectName,
+                    ProposalDate = @ProposalDate,
+                    Description = @Description,
+                    Duration = @Duration,
+                    ProposalStatusId = @ProposalStatusId,
+                    ClientId = @ClientId,
+                    SectorCategoryId = @SectorCategoryId,
+                    ProposalTypeId = @ProposalTypeId,
+                    ProjectTypeId = @ProjectTypeId,
+                    ServiceTypeId = @ServiceTypeId,
+                    ComplexityId = @ComplexityId,
+                    ImpactId = @ImpactId,
+                    ProposalFormatId = @ProposalFormatId,
+                    PotentialHrRate = @PotentialHrRate,
+                    PotentialAECostTotal = @PotentialAECostTotal,
+                    PotentialDesignFee = @PotentialDesignFee,
+                    Total = @Total,
+                    EngPercentStd = @EngPercentStd,
+                    BillingStyleId = @BillingStyleId,
+                    IndirectPercentage = @IndirectPercentage,
+                    IndirectCost = @IndirectCost,
+                    IndirectCostComment = @IndirectCostComment,
+                    ConstructionSupportPercentage = @ConstructionSupportPercentage ,
+                    ConstructionSupportCost = @ConstructionSupportCost,
+                    ConstructionSupportHrRate = @ConstructionSupportHrRate,
+                    ConstructionSupportHrs = @ConstructionSupportHrs,
+                    ConstructionSupportComment = @ConstructionSupportComment,
+                    SupervisionWeekHrs = @SupervisionWeekHrs,
+                    SupervisionHrRate = @SupervisionHrRate,
+                    SupervisionCost = @SupervisionCost,
+                    IsB2B = @IsB2B,
+                    B2BCost = @B2BCost
+                WHERE Id = @Id;
+                ";
+            try
+            {
+                await connection.OpenAsync();
+                int affectedRows = await connection.ExecuteAsync(sql, proposal);
+                if (affectedRows == 0)
+                {
+                    throw new InvalidOperationException("No records updated; the proposal may not exist.");
+                }
+            }
+            catch (SqlException ex)
+            {
+                // Handle specific SQL errors or rethrow a custom exception
+                Console.WriteLine($"SQL Error: {ex.Message}");
+                throw new ApplicationException("A database error occurred during the update operation.", ex);
+            }
+            catch (Exception ex)
+            {
+                // Handle other exceptions or rethrow a generic exception
+                Console.WriteLine($"General Error: {ex.Message}");
+                throw new ApplicationException("An error occurred during the update operation.", ex);
+            }
+            finally
+            {
+                if (connection.State == System.Data.ConnectionState.Open)
+                {
+                    await connection.CloseAsync(); // Ensure the connection is closed
+                }
+            }
+        }
+
+
+        public async Task UpdateProposalTotalCost(int proposalId, decimal? proposalTotal)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"
+						UPDATE Proposals
+						SET
+							Total = @proposalTotal
+						WHERE Id = @proposalId
+						";
+            await connection.ExecuteAsync(sql, new { proposalId, proposalTotal });
+        }
+
+        #endregion
+
+        #region Proposal Delete
+
+        public async Task<int> DeleteProposal(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"DELETE FROM Proposals WHERE Id = @ProposalId";
+            var rowsAffected = await connection.ExecuteAsync(sql, new { ProposalId = id });
+            return rowsAffected;
+        }
+
+        #endregion
+
+
+        #region Proposal Dashboard
+
+        public async Task<ProposalDashboardViewModel> GetDashboardData()
+        {
+            Console.WriteLine("GetDashboardDataAsync - Method started");
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                // 1. Fetch Total Proposals
+                var totalProposalsQuery = "SELECT COUNT(*) FROM Proposals";
+                int totalProposals = await connection.QuerySingleAsync<int>(totalProposalsQuery);
+                Console.WriteLine($"Total Proposals: {totalProposals}");
+
+                // 2. Fetch latest proposal statuses and count approved and generated proposals
+                var proposalStatusesQuery = @"
+            WITH LatestStatus AS (
+                SELECT p.Id AS ProposalId, MAX(psl.DateChanged) AS LatestDate
+                FROM Proposals p
+                JOIN ProposalStatusLogs psl ON p.Id = psl.ProposalId
+                GROUP BY p.Id
+            )
+            SELECT psl.ProposalId, psl.StatusId, ps.Name AS StatusName
+            FROM LatestStatus ls
+            JOIN ProposalStatusLogs psl ON ls.ProposalId = psl.ProposalId AND ls.LatestDate = psl.DateChanged
+            JOIN ProposalStatuses ps ON psl.StatusId = ps.Id
+        ";
+
+                var statusData =
+                    await connection.QueryAsync<(int ProposalId, int StatusId, string StatusName)>(
+                        proposalStatusesQuery);
+                var approvedProposals = statusData.Count(x => x.StatusName == "Awarded");
+                var generatedProposals = statusData.Count(x => x.StatusName != "Awarded");
+
+                // 3. Fetch Proposals By Type
+                Console.WriteLine("Fetching proposals by type...");
+                var proposalsByTypeQuery = @"
+            SELECT ProposalTypes.Name, COUNT(*) AS Count
+            FROM Proposals
+            JOIN ProposalTypes ON Proposals.ProposalTypeId = ProposalTypes.Id
+            GROUP BY ProposalTypes.Name";
+                var proposalsByType = await connection.QueryAsync<(string Name, int Count)>(proposalsByTypeQuery);
+                var proposalsByTypeDict = proposalsByType.ToDictionary(x => x.Name, x => x.Count);
+                Console.WriteLine($"Proposals By Type: {string.Join(", ", proposalsByTypeDict)}");
+
+                // 4. Fetch Sector Earnings
+                Console.WriteLine("Fetching sector earnings...");
+                var sectorEarningsQuery = @"
+            SELECT SectorCategories.Name, SUM(Total) AS Earnings
+            FROM Proposals
+            JOIN SectorCategories ON Proposals.SectorCategoryId = SectorCategories.Id
+            GROUP BY SectorCategories.Name";
+                var sectorEarnings = await connection.QueryAsync<(string Name, decimal Earnings)>(sectorEarningsQuery);
+                var sectorEarningsDict = sectorEarnings.ToDictionary(x => x.Name, x => x.Earnings);
+                Console.WriteLine($"Sector Earnings: {string.Join(", ", sectorEarningsDict)}");
+
+                // 5. Fetch Complexity vs Total Cost
+                Console.WriteLine("Fetching complexity vs total cost...");
+                var complexityVsCostQuery = @"
+            SELECT Complexities.Name, SUM(Total) AS TotalCost
+            FROM Proposals
+            JOIN Complexities ON Proposals.ComplexityId = Complexities.Id
+            GROUP BY Complexities.Name";
+                var complexityVsCost =
+                    await connection.QueryAsync<(string Name, decimal TotalCost)>(complexityVsCostQuery);
+                var complexityVsCostDict = complexityVsCost.ToDictionary(x => x.Name, x => x.TotalCost);
+                Console.WriteLine($"Complexity vs Total Cost: {string.Join(", ", complexityVsCostDict)}");
+
+                // 6. Fetch Monthly Proposals by Type
+                Console.WriteLine("Fetching monthly proposals by type...");
+                var monthlyProposalsByTypeQuery = @"
+            SELECT 
+                FORMAT(ProposalDate, 'yyyy-MM') AS Month, 
+                ProposalTypes.Name AS ProposalType, 
+                COUNT(*) AS ProposalCount
+            FROM Proposals
+            JOIN ProposalTypes ON Proposals.ProposalTypeId = ProposalTypes.Id
+            GROUP BY FORMAT(ProposalDate, 'yyyy-MM'), ProposalTypes.Name
+            ORDER BY FORMAT(ProposalDate, 'yyyy-MM')";
+                var monthlyProposalsByTypeData =
+                    await connection.QueryAsync<(string Month, string ProposalType, int ProposalCount)>(
+                        monthlyProposalsByTypeQuery);
+
+                // Organize proposals by type and month
+                var groupedMonthlyProposals = new Dictionary<string, Dictionary<string, int>>();
+                foreach (var row in monthlyProposalsByTypeData)
+                {
+                    if (!groupedMonthlyProposals.ContainsKey(row.Month))
+                    {
+                        groupedMonthlyProposals[row.Month] = new Dictionary<string, int>();
+                    }
+
+                    groupedMonthlyProposals[row.Month][row.ProposalType] = row.ProposalCount;
+                }
+
+                Console.WriteLine("Monthly Proposals by Type fetched successfully.");
+
+
+                // Fetch PM Bare Rate vs Bill Rate Data
+                var pmRateQuery = @"
+            SELECT r.Position, SUM(r.BareRate) AS BareRate, SUM(r.BillRate) AS BillRate
+            FROM ProposalResources r
+            JOIN Proposals p ON r.ProposalId = p.Id
+            JOIN ServiceTypes s ON p.ServiceTypeId = s.Id
+            WHERE s.Name = 'Project Management'
+            GROUP BY r.Position";
+
+                var pmRates =
+                    await connection.QueryAsync<(string Position, decimal BareRate, decimal BillRate)>(pmRateQuery);
+
+                // 2. Simplify pmBareVsBill to a Dictionary with basic values
+                var pmBareVsBill = pmRates.ToDictionary(
+                    x => x.Position,
+                    x => new Dictionary<string, decimal>
+                    {
+                        { "BareRate", x.BareRate },
+                        { "BillRate", x.BillRate }
+                    }
+                );
+                Console.WriteLine("PM Rate Data: ", pmBareVsBill);
+
+
+                // Fetch Deliverables with names and cost, excluding "Construction Support"
+                var deliverableCostQuery = @"
+                                            SELECT Name, SUM(Cost) AS TotalCost
+                                            FROM ProjectDeliverables
+                                            WHERE Category != 'Construction Support'
+                                            GROUP BY Name";
+                var deliverables = await connection.QueryAsync<(string Name, decimal TotalCost)>(deliverableCostQuery);
+                var deliverableDict = deliverables.ToDictionary(x => x.Name, x => x.TotalCost);
+
+
+                // Fetch Sector Category Counts
+                var sectorCategoryCountsQuery = @"
+                                            SELECT SectorCategories.Name, COUNT(*) AS Count
+                                            FROM Proposals
+                                            JOIN SectorCategories ON Proposals.SectorCategoryId = SectorCategories.Id
+                                            GROUP BY SectorCategories.Name";
+
+                var sectorCategoryCounts =
+                    await connection.QueryAsync<(string Name, int Count)>(sectorCategoryCountsQuery);
+                var sectorCategoryCountsDict = sectorCategoryCounts.ToDictionary(x => x.Name, x => x.Count);
+
+
+                // Fetch Project Type Distribution
+                var projectTypeDistributionQuery = @"
+                                                    SELECT pt.Name AS ProjectType, COUNT(*) AS Count
+                                                    FROM Proposals p
+                                                    JOIN ProjectTypes pt ON p.ProjectTypeId = pt.Id
+                                                    GROUP BY pt.Name";
+
+                var projectTypeDistribution =
+                    await connection.QueryAsync<(string ProjectType, int Count)>(projectTypeDistributionQuery);
+                var projectTypeDistributionDict =
+                    projectTypeDistribution.ToDictionary(x => x.ProjectType, x => x.Count);
+
+
+                // Fetch Resource Commitment Data
+                var resourceCommitmentQuery = @"
+                                        SELECT TOP 10
+                                        p.ProjectName,
+                                        pr.Name AS ResourceName,
+                                        pr.Hours
+                                    FROM Proposals p
+                                        JOIN ProposalResources pr ON p.Id = pr.ProposalId
+                                        JOIN BusinessResources r ON pr.ResourceId = r.Id
+                                    WHERE pr.Hours > 0 
+                                        AND YEAR(p.ProposalDate) = YEAR(GETDATE())
+                                    ORDER BY p.ProposalDate DESC";
+
+                var resourceCommitment = await connection.QueryAsync<(string ProjectName, string ResourceName, decimal Hours)>(resourceCommitmentQuery);
+
+                var resourceCommitmentDict = resourceCommitment
+                    .Where(x => !string.IsNullOrEmpty(x.ProjectName) && !string.IsNullOrEmpty(x.ResourceName)) // Ensure non-null keys
+                    .GroupBy(x => x.ProjectName)
+                    .ToDictionary(
+                        g => g.Key, // ProjectName as the dictionary key
+                        g => g.Select(x => new Dictionary<string, decimal>
+                        {
+            { x.ResourceName ?? "Unknown Resource", x.Hours } // Handle null ResourceName with a placeholder
+                        }).ToList()
+                    );
+
+                // Fetch the last 10 proposals created.
+
+                var last10ProposalsQuery = @"
+                        SELECT TOP 10 p.[Id], p.[ProjectName], p.[DateCreated], cv.[Name] AS Client
+                        FROM Proposals p
+                        JOIN ClientsVendors cv ON p.ClientId = cv.Id
+                        ORDER BY p.[DateCreated] DESC";
+
+                var last10Proposals =
+                    await connection.QueryAsync<(int Id, string ProjectName, DateTime DateCreated, string Client)>(
+                        last10ProposalsQuery);
+
+                var last10ProposalsList = last10Proposals
+                    .Select(p => new Proposal
+                    {
+                        Id = p.Id,
+                        ProjectName = p.ProjectName,
+                        ProposalDate = p.DateCreated,
+                        Client = new ClientVendor { Name = p.Client }
+                    })
+                    .ToList();
+
+
+                // Fetch Client Budget Allocations
+                var clientBudgetAllocationsQuery = @"
+                                                SELECT 
+                                                    cv.Name AS ClientName,
+                                                    SUM(p.Total) AS TotalBudget
+                                                FROM Proposals p
+                                                JOIN ClientsVendors cv ON p.ClientId = cv.Id
+                                                WHERE YEAR(p.DateCreated) = @CurrentYear
+                                                GROUP BY cv.Name";
+
+                var clientBudgetAllocations = await connection.QueryAsync<(string ClientName, decimal TotalBudget)>(
+                    clientBudgetAllocationsQuery, new { CurrentYear = DateTime.Now.Year });
+
+                var clientBudgetAllocationsDict = clientBudgetAllocations
+                    .ToDictionary(x => x.ClientName, x => x.TotalBudget);
+
+
+                // Construct the dashboard data object
+                var dashboardData = new ProposalDashboardViewModel
+                {
+                    TotalProposals = totalProposals,
+                    ApprovedProposals = approvedProposals,
+                    GeneratedProposals = generatedProposals,
+                    ProposalsByType = proposalsByTypeDict,
+                    SectorEarnings = sectorEarningsDict,
+                    ComplexityVsCost = complexityVsCostDict,
+                    PMBareVsBill = pmBareVsBill,
+                    MonthlyProposalsByType = groupedMonthlyProposals, // New addition
+                    Deliverables = deliverableDict,
+                    SectorCategoryCounts = sectorCategoryCountsDict,
+                    ResourceCommitment = resourceCommitmentDict,
+                    ProjectTypeDistribution = projectTypeDistributionDict,
+                    ClientBudgetAllocations = clientBudgetAllocationsDict,
+                    Last10Proposals = last10ProposalsList
+                };
+
+                Console.WriteLine("GetDashboardDataAsync - Method finished successfully");
+                return dashboardData;
+            }
+            catch (Exception ex)
+            {
+                // Log: Exception occurred
+                Console.WriteLine($"Error in GetDashboardDataAsync: {ex.Message}");
+                throw; // Re-throw the exception after logging it
+            }
+        }
+
+
+        public async Task<Dictionary<string, Dictionary<string, int>>> GetFilteredProposalGenerationByMonth(
+            DateTime? startDate, DateTime? endDate)
+        {
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+                var sql = @"
+                    SELECT 
+                    FORMAT(ProposalDate, 'yyyy-MM') AS Month, 
+                    ProposalTypes.Name AS ProposalType, 
+                    COUNT(*) AS ProposalCount
+                FROM Proposals
+                JOIN ProposalTypes ON Proposals.ProposalTypeId = ProposalTypes.Id
+                WHERE (@startDate IS NULL OR ProposalDate >= @startDate)
+                AND (@endDate IS NULL OR ProposalDate <= @endDate)
+                GROUP BY FORMAT(ProposalDate, 'yyyy-MM'), ProposalTypes.Name
+                ORDER BY FORMAT(ProposalDate, 'yyyy-MM')
+                ";
+
+                var result = await connection.QueryAsync(sql, new { startDate, endDate });
+
+                var proposalData = new Dictionary<string, Dictionary<string, int>>();
+
+                //Group results by month and proposal type:
+                foreach (var row in result)
+                {
+                    string month = row.Month;
+                    string proposalType = row.ProposalType;
+                    int count = row.ProposalCount;
+
+                    if (!proposalData.ContainsKey(month))
+                    {
+                        proposalData[month] = new Dictionary<string, int>();
+                    }
+
+                    if (!proposalData[month].ContainsKey(proposalType))
+                    {
+                        proposalData[month][proposalType] = count;
+                    }
+                    else
+                    {
+                        proposalData[month][proposalType] += count;
+                    }
+                }
+
+                return proposalData;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in GetDashboardDataAsync: {ex.Message}");
+                throw new System.Data.DataException("An SQL error occurred while fetching Proposal ServiceType data: ",
+                    ex);
+            }
+        }
+
+        public async Task<(int ApprovedProposals, int GeneratedProposals)>
+            GetFilteredProposaGenerationVsApprovalByMonth(DateTime? startDate, DateTime? endDate)
+        {
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+                // Fetch approved and generated proposals filtered by date range
+                var proposalStatusesQuery = @"
+                    WITH LatestStatus AS (
+            SELECT p.Id AS ProposalId, MAX(psl.DateChanged) AS LatestDate
+            FROM Proposals p
+            JOIN ProposalStatusLogs psl ON p.Id = psl.ProposalId
+            WHERE CONVERT(DATE, p.DateCreated) BETWEEN @startDate AND @endDate
+            GROUP BY p.Id
+        )
+        SELECT psl.ProposalId, psl.StatusId, ps.Name AS StatusName
+        FROM LatestStatus ls
+        JOIN ProposalStatusLogs psl ON ls.ProposalId = psl.ProposalId AND ls.LatestDate = psl.DateChanged
+        JOIN ProposalStatuses ps ON psl.StatusId = ps.Id
+                    ";
+
+                var statusData = await connection.QueryAsync<(int ProposalId, int StatusId, string StatusName)>(
+                    proposalStatusesQuery,
+                    new { startDate, endDate });
+                // Count approved and generated proposals
+                var approvedProposals = statusData.Count(x => x.StatusName == "Awarded");
+                var generatedProposals = statusData.Count(x => x.StatusName == "Generated");
+
+                Console.WriteLine(
+                    $"Approved Proposals: {approvedProposals}, Generated Proposals: {generatedProposals}");
+                return (approvedProposals, generatedProposals);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in GetDashboardDataAsync: {ex.Message}");
+                throw new System.Data.DataException("An SQL error occurred while fetching Proposal ServiceType data: ",
+                    ex);
+            }
+        }
+
+        public async Task<Dictionary<string, int>> GetFilteredProposalSectorDistribution(DateTime? startDate,
+            DateTime? endDate, List<string> sectors)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                // Build the base query
+                var query = @"
+            SELECT SectorCategories.Name, COUNT(*) AS ProposalCount
+            FROM Proposals
+            JOIN SectorCategories ON Proposals.SectorCategoryId = SectorCategories.Id
+            WHERE 1 = 1";
+
+                // Add filters for the date range if provided
+                if (startDate.HasValue && endDate.HasValue)
+                {
+                    query += " AND Proposals.DateCreated BETWEEN @StartDate AND @EndDate";
+                }
+
+                // Add filters for selected sectors if provided
+                if (sectors != null && sectors.Count > 0)
+                {
+                    query += " AND SectorCategories.Name IN @Sectors";
+                }
+
+                query += " GROUP BY SectorCategories.Name";
+
+                // Execute the query and return the result as a dictionary
+                var sectorDistribution = await connection.QueryAsync<(string Name, int ProposalCount)>(query, new
+                {
+                    StartDate = startDate,
+                    EndDate = endDate,
+                    Sectors = sectors
+                });
+
+                return sectorDistribution.ToDictionary(x => x.Name, x => x.ProposalCount);
+            }
+        }
+
+        public async Task<Dictionary<string, decimal>> GetFilteredSectorEarnings(List<string> sectors,
+            DateTime? startDate, DateTime? endDate)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            // SQL query to fetch sector earnings filtered by sectors and date range
+            var sql = @"
+                        SELECT sc.Name, SUM(p.Total) AS Earnings
+                        FROM Proposals p
+                        JOIN SectorCategories sc ON p.SectorCategoryId = sc.Id
+                        WHERE p.ProposalDate >= @StartDate
+                        AND p.ProposalDate <= @EndDate
+                        AND sc.Name IN @Sectors
+                        GROUP BY sc.Name";
+
+            Console.WriteLine(
+                $"Executing query with parameters: StartDate = {startDate}, EndDate = {endDate}, Sectors = {string.Join(", ", sectors)}");
+
+            var sectorEarnings = await connection.QueryAsync<(string Name, decimal Earnings)>(
+                sql,
+                new { StartDate = startDate, EndDate = endDate, Sectors = sectors });
+
+            return sectorEarnings.ToDictionary(x => x.Name, x => x.Earnings);
+        }
+
+        public async Task<Dictionary<string, decimal>> GetFilteredProjectTypeDistribution(List<string> proposalsByTypes,
+            DateTime? startDate, DateTime? endDate)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            // SQL query to fetch project type distribution within the date range
+            var sql = @"
+                        SELECT pt.Name, COUNT(p.Id) AS ProjectCount
+                        FROM Proposals p
+                        JOIN ProposalTypes pt ON p.ProposalTypeId = pt.Id
+                        WHERE p.ProposalDate >= @StartDate
+                        AND p.ProposalDate <= @EndDate
+                        AND pt.Name IN @ProposalTypes
+                        GROUP BY pt.Name";
+
+            Console.WriteLine(
+                $"Executing query with parameters: StartDate = {startDate}, EndDate = {endDate}, ProjectTypes = {string.Join(", ", proposalsByTypes)}");
+
+            var proposalTypeCounts = await connection.QueryAsync<(string Name, int ProjectCount)>(
+                sql,
+                new { StartDate = startDate, EndDate = endDate, ProposalTypes = proposalsByTypes });
+
+            var totalProjects = proposalTypeCounts.Sum(x => x.ProjectCount);
+
+            // Convert to a percentage distribution
+            var result = proposalTypeCounts.ToDictionary(
+                x => x.Name,
+                x => Math.Round(((decimal)x.ProjectCount / totalProjects) * 100, 2) // Calculate percentage
+            );
+
+            return result;
+        }
+
+        public async Task<Dictionary<string, decimal>> GetFilteredComplexityCost(List<string> complexities,
+            DateTime? startDate, DateTime? endDate)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            // SQL query to fetch complexity vs cost data for the selected date range
+            var sql = @"
+        SELECT c.Name AS Complexity, SUM(p.Total) AS TotalCost
+        FROM Proposals p
+        JOIN Complexities c ON p.ComplexityId = c.Id
+        WHERE p.ProposalDate >= @StartDate
+        AND p.ProposalDate <= @EndDate
+        AND c.Name IN @Complexities
+        GROUP BY c.Name";
+
+            Console.WriteLine(
+                $"Executing query with parameters: StartDate = {startDate}, EndDate = {endDate}, Complexities = {string.Join(", ", complexities)}");
+
+            var complexityCosts = await connection.QueryAsync<(string Complexity, decimal TotalCost)>(
+                sql,
+                new { StartDate = startDate, EndDate = endDate, Complexities = complexities });
+
+            // Convert the result into a dictionary
+            var result = complexityCosts.ToDictionary(
+                x => x.Complexity,
+                x => x.TotalCost
+            );
+
+            return result;
+        }
+
+        #endregion Proposal Dashboard
+
+        #endregion
+
+        #region ProposalTypes
+
+        public async Task<IEnumerable<ProposalType>> GetProposalTypes()
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT * FROM dbo.ProposalTypes";
+            return await connection.QueryAsync<ProposalType>(sql);
+        }
+
+        public async Task<ProposalType> GetProposalTypeById(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT * FROM dbo.ProposalTypes WHERE Id = @Id";
+            return await connection.QueryFirstOrDefaultAsync<ProposalType>(sql, new { Id = id });
+        }
+
+        public async Task<ProposalType> GetProposalTypeByProposalId(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT 
+							pt.Id,
+							pt.Name
+						FROM ProposalTypes pt
+						LEFT JOIN Proposals p ON pt.Id = p.ProposalTypeId
+						WHERE p.Id = @Id";
+            return await connection.QueryFirstOrDefaultAsync<ProposalType>(sql, new { Id = id });
+        }
+
+        public async Task<ProposalType> GetProposalTypeByName(string Name)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT * FROM dbo.ProposalTypes WHERE Name = @Name";
+            return await connection.QueryFirstOrDefaultAsync<ProposalType>(sql, new { Name = Name });
+        }
+
+        #endregion
+
+        #region ProjectTypes
+
+        public async Task<IEnumerable<ProjectType>> GetProjectTypes()
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT * FROM dbo.ProjectTypes";
+            return await connection.QueryAsync<ProjectType>(sql);
+        }
+
+        public async Task<ProjectType> GetProjectTypeById(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT * FROM dbo.ProjectTypes WHERE Id = @Id";
+            return await connection.QueryFirstOrDefaultAsync<ProjectType>(sql, new { Id = id });
+        }
+
+        public async Task<ProjectType> GetProjectTypeByProposalId(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT 
+							pt.Id,
+							pt.Name
+						FROM ProjectTypes pt
+						JOIN Proposals p ON pt.Id = p.ProjectTypeId
+						WHERE p.Id = @Id";
+            return await connection.QueryFirstOrDefaultAsync<ProjectType>(sql, new { Id = id });
+        }
+
+        public async Task<ProjectType> GetProjectTypeByName(string name)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT * FROM dbo.ProjectTypes WHERE Name = @Name";
+            return await connection.QueryFirstOrDefaultAsync<ProjectType>(sql, new { Name = name });
+        }
+
+        #endregion ProjectType
+
+        #region ServiceTypes
+
+        public async Task<IEnumerable<ServiceType>> GetServiceTypes()
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT * FROM dbo.ServiceTypes";
+            return await connection.QueryAsync<ServiceType>(sql);
+        }
+
+        public async Task<ServiceType> GetServiceTypeById(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT * FROM dbo.ServiceTypes WHERE Id = @Id";
+            return await connection.QueryFirstOrDefaultAsync<ServiceType>(sql, new { Id = id });
+        }
+
+        public async Task<ServiceType> GetServiceTypeByProposalId(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT 
+							st.Id,
+							st.Name
+						FROM ServiceTypes st
+						JOIN Proposals p ON st.Id = p.ServiceTypeId
+						WHERE p.Id = @Id";
+            try
+            {
+                return await connection.QueryFirstOrDefaultAsync<ServiceType>(sql, new { Id = id });
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Proposal ServiceType data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Proposal ServiceType data: ",
+                    ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An SQL error occurred while writing ProposalDisciplinePercent data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Proposal ServiceType data: ",
+                    ex);
+            }
+        }
+
+        public async Task<ServiceType> GetServiceTypeByName(string name)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT * FROM ServiceTypes WHERE Name = @Name";
+            return await connection.QueryFirstOrDefaultAsync<ServiceType>(sql, new { Name = name });
+        }
+
+        #endregion
+
+        #region Complexity
+
+        public async Task<IEnumerable<Complexity>> GetComplexities()
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT * FROM Complexities";
+            return await connection.QueryAsync<Complexity>(sql);
+        }
+
+        public async Task<Complexity> GetComplexityById(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT * FROM Complexities WHERE Id = @Id";
+            return await connection.QueryFirstOrDefaultAsync<Complexity>(sql, new { Id = id });
+        }
+
+        public async Task<Complexity> GetComplexityByProposalId(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT 
+							c.Id,
+							c.Name
+						FROM Complexities c
+						JOIN Proposals p ON c.Id = p.ComplexityId
+						WHERE p.Id = @Id";
+            return await connection.QueryFirstOrDefaultAsync<Complexity>(sql, new { Id = id });
+        }
+
+        public async Task<Complexity> GetComplexityByName(string name)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT * FROM dbo.Complexities WHERE Name = @Name";
+            return await connection.QueryFirstOrDefaultAsync<Complexity>(sql, new { Name = name });
+        }
+
+        #endregion
+
+        #region Impact
+
+        public async Task<IEnumerable<Impact>> GetImpacts()
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT * FROM dbo.Impacts";
+            return await connection.QueryAsync<Impact>(sql);
+        }
+
+        public async Task<Impact> GetImpactById(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT * FROM dbo.Impacts WHERE Id = @Id";
+            return await connection.QueryFirstOrDefaultAsync<Impact>(sql, new { Id = id });
+        }
+
+        public async Task<Impact> GetImpactByProposalId(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT 
+							I.Id,
+							I.Name
+						FROM Impacts I
+						JOIN Proposals p ON I.Id = p.ImpactId
+						WHERE p.Id = @Id";
+            return await connection.QueryFirstOrDefaultAsync<Impact>(sql, new { Id = id });
+        }
+
+        public async Task<Impact> GetImpactByName(string name)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT * FROM dbo.Impacts WHERE Name = @Name";
+            return await connection.QueryFirstOrDefaultAsync<Impact>(sql, new { Name = name });
+        }
+
+        #endregion
+
+        #region Sector
+
+        public async Task<IEnumerable<Sector>> GetSectors()
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT * FROM Sectors WHERE 1 = 1";
+            return await connection.QueryAsync<Sector>(sql);
+        }
+
+        public async Task<Sector> GetSectorById(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT * FROM Sectors WHERE Id = @Id";
+            return await connection.QueryFirstOrDefaultAsync<Sector>(sql, new { Id = id });
+        }
+
+        public async Task<Sector> GetSectorByName(string Name)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT * FROM Sectors WHERE Name = @Name";
+            return await connection.QueryFirstOrDefaultAsync<Sector>(sql, new { Name = Name });
+        }
+
+        public async Task<Sector> GetSectorByProposalId(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT 
+							s.Id,
+							s.Name,
+							s.Description,
+							s.SectorCategoryId
+						FROM Sectors s
+						LEFT JOIN Proposals p ON s.Id = p.SectorId
+						WHERE p.Id = @Id";
+            return await connection.QueryFirstOrDefaultAsync<Sector>(sql, new { Id = id });
+        }
+
+        public async Task<IEnumerable<SectorCategory>> GetSectorCategories()
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT * FROM SectorCategories WHERE 1 = 1";
+            return await connection.QueryAsync<SectorCategory>(sql);
+        }
+
+        public async Task<SectorCategory> GetSectorCategoryById(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT * FROM SectorCategories WHERE Id = @Id";
+            return await connection.QueryFirstOrDefaultAsync<SectorCategory>(sql, new { Id = id });
+        }
+
+        public async Task<SectorCategory> GetSectorCategoryByProposalId(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT 
+							s.Id,
+							s.Name,
+							s.Description
+						FROM SectorCategories s
+						LEFT JOIN Proposals p ON s.Id = p.SectorCategoryId
+						WHERE p.Id = @Id";
+            return await connection.QueryFirstOrDefaultAsync<SectorCategory>(sql, new { Id = id });
+        }
+
+        public async Task<SectorCategory> GetSectorCategoryByName(string Name)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT * FROM SectorCategories WHERE Name = @Name";
+            return await connection.QueryFirstOrDefaultAsync<SectorCategory>(sql, new { Name = Name });
+        }
+
+        #endregion Sector
+
+        #region Proposal ProposalStatuses
+
+        public async Task<IEnumerable<StatusOption>> GetProposalStatusLogs()
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT * FROM ProposalStatuses";
+            var ProposalStatuses = await connection.QueryAsync<StatusOption>(sql);
+            return ProposalStatuses.ToList();
+        }
+
+        public async Task<ProposalStatus> GetProposalStatusById(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"
+        WITH LatestStatus AS (
+            SELECT 
+                ps.Id,
+                ps.DateChanged,
+                ps.ProposalId,
+                ps.StatusId,
+                s.Name AS StatusString,
+                ROW_NUMBER() OVER (PARTITION BY ps.Id ORDER BY ps.DateChanged DESC, ps.Id DESC) AS rn
+            FROM 
+                ProposalStatusLogs ps
+            LEFT JOIN 
+                ProposalStatuses s ON ps.StatusId = s.Id
+        )
+        SELECT 
+            ls.Id,
+            ls.DateChanged,
+            ls.ProposalId,
+            ls.StatusId,
+            ls.StatusString
+        FROM 
+            LatestStatus ls
+        WHERE 
+            ls.rn = 1
+            AND ls.Id = @Id;";
+
+            try
+            {
+                return await connection.QueryFirstOrDefaultAsync<ProposalStatus>(sql, new { Id = id });
+            }
+            catch (SqlException ex)
+            {
+                Debug.WriteLine("An SQL error occurred while fetching Proposal Status data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Proposal Status data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Proposal Status data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Proposal Status data.", ex);
+            }
+        }
+
+        public async Task<ProposalStatus> GetProposalStatusByProposalId(int Id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"WITH LatestStatus AS (
+						SELECT 
+							ps.Id,
+							ps.DateChanged,
+							ps.ProposalId,
+							ps.StatusId,
+							s.Name AS StatusString,
+							ROW_NUMBER() OVER (PARTITION BY ps.ProposalId ORDER BY ps.DateChanged DESC, ps.Id DESC) AS rn
+						FROM 
+							ProposalStatusLogs ps
+						LEFT JOIN 
+							ProposalStatuses s ON ps.StatusId = s.Id
+					)
+					SELECT 
+						ls.Id,
+						ls.DateChanged,
+						ls.ProposalId,
+						ls.StatusId,
+						ls.StatusString
+					FROM 
+						LatestStatus ls
+					WHERE 
+						ls.rn = 1
+						AND ls.ProposalId = @Id;";
+
+            try
+            {
+                return await connection.QueryFirstOrDefaultAsync<ProposalStatus>(sql, new { Id = Id });
+            }
+            // OJO Id here is the ProposalId
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Billing Styles data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Billing Styles data.", ex);
+            }
+        }
+
+        public async Task<ProposalStatus> GetProposalStatusByName(string StatusString)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT * FROM ProposalStatuses WHERE Name = @Name";
+            return await connection.QueryFirstOrDefaultAsync<ProposalStatus>(sql, new { Name = StatusString });
+        }
+
+        #endregion
+
+        #region Proposal Format
+
+        public async Task<ProposalFormat> GetProposalFormatByName(string Name)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT * FROM dbo.ProposalFormats WHERE Name = @Name";
+            return await connection.QueryFirstOrDefaultAsync<ProposalFormat>(sql, new { Name = Name });
+        }
+
+        public async Task<List<ProposalFormat>> GetProposalFormats()
+        {
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+                var sql = @"SELECT * FROM dbo.ProposalFormats";
+                var results = await connection.QueryAsync<ProposalFormat>(sql);
+
+                return results.ToList();
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Billing Styles data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Billing Styles data.", ex);
+            }
+        }
+
+
+        public async Task<ProposalFormat> GetProposalFormatById(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT * FROM dbo.ProposalFormats WHERE Id = @Id";
+            return await connection.QueryFirstOrDefaultAsync<ProposalFormat>(sql, new { Id = id });
+        }
+
+        public async Task<ProposalFormat> GetProposalFormatByProposalId(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var sql = @"SELECT 
+								pf.Id,
+								pf.Name,
+								pf.ServiceTypeId
+							FROM ProposalFormats pf
+							JOIN Proposals p ON p.ProposalFormatId = pf.Id
+							WHERE p.Id = @Id;";
+                var result = await connection.QueryFirstOrDefaultAsync<ProposalFormat>(sql, new { Id = id });
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Billing Styles data.", ex);
+            }
+        }
+
+
+        public async Task<IEnumerable<SelectListItem>> GetFormatOptionsByServiceType(int serviceTypeId)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"
+                SELECT Id, Name
+                FROM ProposalFormats
+                WHERE ServiceTypeId = @ServiceTypeId";
+            var formats = await connection.QueryAsync<ProposalFormat>(sql, new { ServiceTypeId = serviceTypeId });
+            return formats.Select(f => new SelectListItem
+            {
+                Text = f.Name,
+                Value = f.Id.ToString()
+            });
+        }
+
+        #endregion Proposal Format
+
+        #region Client
+
+        public async Task<ClientVendor> GetClientByProposalId(int proposalId)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT cv.Id, cv.ClientVendorId, cv.ClientType, cv.Name, cv.AddressLine, cv.AddressLine2, 
+                        cv.State, cv.Zipcode, cv.TownId, cv.Email, cv.ContactOnePhone, cv.Description, 
+                        cv.Website, cv.Specialty, cv.FaxNumber, cv.Active, cv.ContactOne, 
+                        cv.ImageName, t.Id AS TownId, t.Name AS TownName
+                FROM ClientsVendors cv
+                LEFT JOIN Towns t ON cv.TownId = t.Id
+                JOIN Proposals p ON cv.Id = p.ClientId
+                WHERE p.Id = @proposalId";
+
+            // We are using a join for the Town entity
+            var clientVendor = await connection.QueryAsync<ClientVendor, Town, ClientVendor>(
+                sql,
+                (clientVendor, town) =>
+                {
+                    clientVendor.town = town; // Map the town object
+                    return clientVendor;
+                },
+                new { proposalId },
+                splitOn: "TownId"
+            );
+
+            return clientVendor.FirstOrDefault();
+        }
+
+        #endregion
+
+        #region Phases
+
+        public async Task<IEnumerable<Phase>> GetPhases()
+        {
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                var sql = @"SELECT * 
+				FROM ServiceDeliverables
+				WHERE CategoryId = 2;";
+                var phases = await connection.QueryAsync<Phase>(sql);
+
+                return phases;
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching phase : " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching phases.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching phases: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching phases.", ex);
+            }
+        }
+
+        #endregion Phases
+
+        #region Proposal AdditionalCosts
+
+        #region Proposal AdditionalCosts Create
+
+        public async Task<int> CreateAdditionalCosts(AdditionalCost additionalCost)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"
+				INSERT INTO ProposalAdditionalCosts (Name, Description, Unit, Quantity, ProposalId, TotalCost, CostPerUnit)
+				VALUES (@Name, @Description, @Unit, @Quantity, @ProposalId, @TotalCost, @CostPerUnit);
+				SELECT CAST(SCOPE_IDENTITY() as int);
+				";
+            return await connection.QuerySingleAsync<int>(sql, additionalCost);
+        }
+
+        #endregion
+
+        #region Proposal AdditionalCosts Read
+
+        public async Task<List<AdditionalCost>> GetAdditionalCostsByProposalId(int proposalId)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT * FROM ProposalAdditionalCosts WHERE ProposalId = @ProposalId";
+            var additionalCosts = await connection.QueryAsync<AdditionalCost>(sql, new { ProposalId = proposalId });
+            return additionalCosts.ToList();
+        }
+
+        #endregion
+
+        #region Proposal AdditionalCosts Update
+
+        public async Task<AdditionalCost> UpdateAdditionalCost(AdditionalCost additionalCost)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"
+				UPDATE ProposalAdditionalCosts
+				SET Name = @Name,
+					Description = @Description,
+					Unit = @Unit,
+                    CostPerUnit = @CostPerUnit,
+					Quantity = @Quantity,
+					TotalCost = @TotalCost,
+					ProposalId = @ProposalId
+				WHERE Id = @Id;
+				SELECT * FROM ProposalAdditionalCosts WHERE Id = @Id;
+				";
+            return await connection.QuerySingleAsync<AdditionalCost>(sql, additionalCost);
+        }
+
+        #endregion
+
+        #region Proposal AdditionalCosts Delete
+
+        public async Task<int> DeleteAdditionalCost(int Id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"DELETE FROM ProposalAdditionalCosts WHERE Id = @Id";
+
+            var affectedRows = await connection.ExecuteAsync(sql, new { Id = Id });
+            return affectedRows;
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Proposal Resources
+
+        #region Proposal Resources Create
+
+        public async Task<int> CreateProposalResources(ProjectResource resource)
+        {
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+                var sql = @"
+				INSERT INTO ProposalResources (Position, Name, BareRate, Quantity, CommitPerc, Multiplier, BillRate, Hours, Cost, ProposalId, ResourceId)
+				VALUES (@Position, @Name, @BareRate, @Quantity, @CommitPerc, @Multiplier, @BillRate, @Hours, @Cost, @ProposalId, @ResourceId);
+				SELECT CAST(SCOPE_IDENTITY() as int);
+				";
+                return await connection.QuerySingleAsync<int>(sql, resource);
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while writing proposal resource data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Billing Styles data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Billing Styles data.", ex);
+            }
+        }
+
+        #endregion
+
+        #region Proposal Resources Read
+
+        public async Task<List<ProjectResource>> GetAllProposalResources()
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT * FROM ProposalResources";
+
+            return (List<ProjectResource>)await connection.QueryAsync<ProjectResource>(sql);
+        }
+
+        public async Task<List<ProjectResource>> GetResourcesByProposalId(int proposalId)
+        {
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+                var sql = @"SELECT * FROM ProposalResources WHERE ProposalId = @ProposalId";
+                var resources = await connection.QueryAsync<ProjectResource>(sql, new { ProposalId = proposalId });
+                return resources.ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new System.Data.DataException("An error occurred while fetching report data.", ex);
+            }
+        }
+
+        public async Task<List<ProjectResource>> GetBusinessResourcesByProposalId(int ProposalId)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"SELECT p.*,r.* FROM ProposalResources p 
+            LEFT JOIN BusinessResources r ON p.ResourceId = r.Id WHERE p.ProposalId = @ProposalId;";
+
+            var result = await connection.QueryAsync<ProjectResource, BusinessResource, ProjectResource>(
+                sql,
+                (projectResource, businessResource) =>
+                {
+                    projectResource.Resource = businessResource;
+                    return projectResource;
+                },
+                new { ProposalId },
+                splitOn: "Id");
+
+            return result.ToList();
+        }
+
+        public async Task<List<ProjectResource>> GetResourcesByProposalIdOverview(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT 
+							ps.Id as 'Id',
+							ps.Position,
+							ps.BareRate,
+							ps.Quantity,
+							ps.CommitPerc,
+							ps.Hours,
+							ps.Multiplier,
+							ps.BillRate,
+							ps.[Days] as 'Days'
+						FROM ProposalResources ps
+						WHERE ProposalId = @Id";
+            var resources = await connection.QueryAsync<ProjectResource>(sql, new { Id = id });
+            return resources.ToList();
+        }
+
+        #endregion
+
+        #region Proposal Resources Update
+
+        public async Task<ProjectResource> UpdateProposalResource(ProjectResource resource)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"
+						UPDATE ProposalResources
+						SET Position = @Position,
+							BareRate = @BareRate,
+							Quantity = @Quantity,
+							CommitPerc = @CommitPerc,
+							Hours = @Hours,
+							Multiplier = @Multiplier,
+							BillRate = @BillRate,
+                            Cost = @Cost,
+                            ResourceId = @ResourceId
+						WHERE Id = @Id;
+						SELECT * FROM ProposalResources WHERE Id = @Id;";
+
+            try
+            {
+                return await connection.QuerySingleAsync<ProjectResource>(sql, resource);
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while writing Proposal Resource data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while writing Proposal Resource data: ", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while writing Proposal Resource data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while writing Proposal Resource data: ", ex);
+            }
+        }
+
+        #endregion
+
+        #region Proposal Resource Delete
+
+        public async Task<int> DeleteProposalResource(int Id)
+        {
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+                var sql = @"DELETE FROM ProposalResources WHERE Id = @Id";
+                return await connection.ExecuteAsync(sql, new { Id = Id });
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while writing Proposal Resource data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while writing Proposal Resource data: ", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while writing Proposal Resource data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while writing Proposal Resource data: ", ex);
+            }
+        }
+
+        #endregion
+
+        #endregion Proposal Resources
+
+        #region Proposal Discipline Percentage CRUD Operations
+
+        #region Proposal Discipline Percentage Create
+
+        public async Task<int> CreateProposalDisciplinePercentage(DisciplinePercent disciplinePercent, int proposalId,
+            int projectId, decimal? potentialCost, decimal? potentialTotalHours)
+        {
+            // Add ProposalId and ProjectId to the object
+            disciplinePercent.ProposalId = proposalId;
+            disciplinePercent.ProjectId = projectId;
+
+
+            using var connection = new SqlConnection(connectionString);
+            var sql =
+                @"INSERT INTO ProposalDisciplinePercents (ProposalId, ProjectId, DisciplineId, Percentage, PotentialCost, Hours)
+                VALUES (@ProposalId, @ProjectId, @DisciplineId, @Percentage, @PotentialCost, @Hours);
+                SELECT CAST(SCOPE_IDENTITY() as int);";
+
+
+            return await connection.QuerySingleAsync<int>(sql, new
+            {
+                disciplinePercent.ProposalId,
+                disciplinePercent.ProjectId,
+                disciplinePercent.DisciplineId,
+                disciplinePercent.Percentage,
+                PotentialCost = potentialCost,
+                Hours = potentialTotalHours
+            });
+        }
+
+        public async Task<int> CreateProposalDisciplinePercentage(DisciplinePercent disciplinePercent)
+        {
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+                var sql =
+                    @"INSERT INTO ProposalDisciplinePercents (ProposalId, ProjectId, DisciplineId, Percentage, PotentialCost, Hours, HourlyRate)
+                VALUES (@ProposalId, @ProjectId, @DisciplineId, @Percentage, @PotentialCost, @Hours, @HourlyRate);
+                SELECT CAST(SCOPE_IDENTITY() as int);";
+                var disciplinePercentId = await connection.QuerySingleOrDefaultAsync<int>(sql, new
+                {
+                    disciplinePercent.ProposalId,
+                    disciplinePercent.ProjectId,
+                    disciplinePercent.DisciplineId,
+                    disciplinePercent.Percentage,
+                    PotentialCost = disciplinePercent.PotentialDisciplineCost,
+                    disciplinePercent.Hours,
+                    disciplinePercent.HourlyRate
+                });
+                return disciplinePercentId;
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while writing ProposalDisciplinePercent data: " + ex.Message);
+                throw new System.Data.DataException(
+                    "An SQL error occurred while writing ProposalDisciplinePercent data: ", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An SQL error occurred while writing ProposalDisciplinePercent data: " + ex.Message);
+                throw new System.Data.DataException(
+                    "An SQL error occurred while writing ProposalDisciplinePercent data: ", ex);
+            }
+        }
+
+        public async Task<int> CreateProposalDisciplinePercentageArchDrafter(DisciplinePercent disciplinePercent)
+        {
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+                var sql = @"
+					INSERT INTO ProposalDisciplinePercents 
+						(ProposalId, ProjectId, DisciplineId, Percentage, PotentialCost, Hours, HourlyRate,
+						 ArchitectCost, ArchitectTotalHours, ArchitectPercent, ArchitectRate,
+						 DrafterCost, DrafterTotalHours, DrafterPercent, DrafterRate)
+					VALUES 
+						(@ProposalId, @ProjectId, @DisciplineId, @Percentage, @PotentialCost, @Hours, @HourlyRate,
+						 @ArchitectCost, @ArchitectTotalHours, @ArchitectPercent, @ArchitectRate,
+						 @DrafterCost, @DrafterTotalHours, @DrafterPercent, @DrafterRate);
+					SELECT CAST(SCOPE_IDENTITY() as int);
+					";
+                var disciplinePercentId = await connection.QuerySingleOrDefaultAsync<int>(sql, new
+                {
+                    disciplinePercent.ProposalId,
+                    disciplinePercent.ProjectId,
+                    disciplinePercent.DisciplineId,
+                    disciplinePercent.Percentage,
+                    PotentialCost = disciplinePercent.PotentialDisciplineCost,
+                    disciplinePercent.Hours,
+                    disciplinePercent.HourlyRate,
+                    disciplinePercent.ArchitectCost,
+                    disciplinePercent.ArchitectTotalHours,
+                    disciplinePercent.ArchitectPercent,
+                    disciplinePercent.ArchitectRate,
+                    disciplinePercent.DrafterCost,
+                    disciplinePercent.DrafterTotalHours,
+                    disciplinePercent.DrafterPercent,
+                    disciplinePercent.DrafterRate
+                });
+                return disciplinePercentId;
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while writing ProposalDisciplinePercent data: " + ex.Message);
+                throw new System.Data.DataException(
+                    "An SQL error occurred while writing ProposalDisciplinePercent data: ", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An SQL error occurred while writing ProposalDisciplinePercent data: " + ex.Message);
+                throw new System.Data.DataException(
+                    "An SQL error occurred while writing ProposalDisciplinePercent data: ", ex);
+            }
+        }
+
+        #endregion Proposal Discipline Percentage Create
+
+        #region Proposal Discipline Percentage Read
+
+        public async Task<List<DisciplinePercent>> GetDisciplinePercentsByProposalId(int proposalId)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"SELECT * FROM ProposalDisciplinePercents WHERE ProposalId = @ProposalId";
+            var disciplinePercents =
+                await connection.QueryAsync<DisciplinePercent>(sql, new { ProposalId = proposalId });
+            return disciplinePercents.ToList();
+        }
+
+        public async Task<List<DisciplinePercent>> GetDisciplinePercentsByProposalIdOverview(int proposalId)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"
+		SELECT 
+			dp.*,
+			d.Name as DisciplineName
+		FROM ProposalDisciplinePercents dp
+		LEFT JOIN JobDisciplines d ON dp.DisciplineId = d.Id
+		WHERE dp.ProposalId = @ProposalId";
+
+            var parameters = new { ProposalId = proposalId };
+
+            var disciplinePercents = new List<DisciplinePercent>();
+            var result = await connection.QueryAsync(sql, parameters);
+            foreach (var row in result)
+            {
+                var disciplinePercent = new DisciplinePercent
+                {
+                    Id = row.Id,
+                    ProjectId = row.ProjectId,
+                    ProposalId = row.ProposalId,
+                    DisciplineId = row.DisciplineId,
+                    Percentage = row.Percentage,
+                    Discipline = new Discipline
+                    {
+                        Id = row.DisciplineId,
+                        Name = row.DisciplineName
+                    },
+                    Hours = row.Hours,
+                    PotentialDisciplineCost = row.PotentialCost
+                };
+                disciplinePercents.Add(disciplinePercent);
+            }
+
+            return disciplinePercents;
+        }
+
+        #endregion Proposal Discipline Percentage Read
+
+        #region Proposal Discipline Percentage Update
+
+        public async Task<DisciplinePercent> UpdateDisciplinePercent(DisciplinePercent disciplinePercent,
+            decimal? potentialCost, decimal? potentialTotalHours)
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var sql = @"
+					UPDATE ProposalDisciplinePercents
+					SET DisciplineId = @DisciplineId,
+						Percentage = CASE WHEN @Percentage IS NOT NULL THEN @Percentage ELSE Percentage END,
+						PotentialCost = CASE WHEN @PotentialCost IS NOT NULL THEN @PotentialCost ELSE PotentialCost END,
+						Hours = CASE WHEN @Hours IS NOT NULL THEN @Hours ELSE Hours END
+					WHERE Id = @Id
+					SELECT * FROM ProposalDisciplinePercents WHERE Id = @Id;
+				;";
+
+                Debug.WriteLine("SQL: " + sql);
+                Debug.WriteLine("Parameters: " + JsonConvert.SerializeObject(new
+                {
+                    disciplinePercent.DisciplineId,
+                    disciplinePercent.Percentage,
+                    PotentialCost = potentialCost,
+                    Hours = potentialTotalHours,
+                    disciplinePercent.Id
+                }));
+                var results = await connection.QuerySingleAsync<DisciplinePercent>(sql, new
+                {
+                    disciplinePercent.DisciplineId,
+                    disciplinePercent.Percentage,
+                    PotentialCost = potentialCost,
+                    Hours = potentialTotalHours,
+                    disciplinePercent.Id
+                });
+
+                return results;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching report data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching report data.", ex);
+            }
+        }
+
+        #endregion Proposal Discipline Percentage Update
+
+        #region Proposal Discipline Percentage Delete
+
+        public async Task<int> DeleteDeliverable(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var sql = @"DELETE FROM ProposalDeliverables WHERE Id = @Id";
+            //await connection.ExecuteAsync(sql, new { Id = id });
+            var affectedRows = await connection.ExecuteAsync(sql, new { Id = id });
+            return affectedRows;
+        }
+
+        #endregion Proposal Discipline Percentage Delete
+
+        #endregion Proposal Discipline Percentage CRUD Operations
+
+        #region Proposal Deliverable CRUD
+
+        public async Task<List<ProjectDeliverable>> GetProposalDeliverablesByProposalIdOverview(int proposalId)
+        {
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+                var sql = @"
+		SELECT 
+			dp.*
+		FROM ProposalDeliverables dp
+		WHERE dp.ProposalId = @ProposalId";
+
+                var parameters = new { ProposalId = proposalId };
+
+                var proposalDeliverables = new List<ProjectDeliverable>();
+                var result = await connection.QueryAsync(sql, parameters);
+                foreach (var row in result)
+                {
+                    var deliverable = new ProjectDeliverable
+                    {
+                        Id = row.Id,
+                        ProposalId = row.ProposalId,
+                        Category = row.Category,
+                        Name = row.Name,
+                        Percentage = (float)row.Percentage,
+                        Cost = row.Cost,
+                        PlannedStartDate = row.PlannedStartDate,
+                        PlannedEndDate = row.PlannedEndDate,
+                    };
+                    proposalDeliverables.Add(deliverable);
+                }
+
+                return proposalDeliverables;
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching a&e proposal report data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching a&e proposal report data: ",
+                    ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An SQL error occurred while fetching a&e proposal report data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching a&e proposal report data: ",
+                    ex);
+            }
+        }
+
+        #endregion Proposal Deliverable CRUD
+
+        #region Proposal Dashboard Services
+
+        public async Task<Dictionary<string, int>> GetProposalStatusCounts()
+        {
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                var sql = @"
+            WITH LatestStatus AS (
+                SELECT 
+                    ps.ProposalId,
+                    ps.StatusId,
+                    ROW_NUMBER() OVER (PARTITION BY ps.ProposalId ORDER BY ps.DateChanged DESC, ps.Id DESC) AS rn
+                FROM 
+                    ProposalStatusLogs ps
+            )
+            SELECT 
+                s.Name AS StatusName, 
+                COUNT(p.Id) AS ProposalCount
+            FROM 
+                ProposalStatuses s
+            LEFT JOIN 
+                LatestStatus ls ON s.Id = ls.StatusId AND ls.rn = 1
+            LEFT JOIN 
+                Proposals p ON ls.ProposalId = p.Id
+            GROUP BY 
+                s.Name;";
+
+                var results = await connection.QueryAsync(sql);
+
+                // Convert the results to a dictionary, ensuring that all statuses are accounted for
+                var dictionary = results.ToDictionary(
+                    result => (string)result.StatusName,
+                    result => (int)result.ProposalCount
+                );
+
+                // Return the dictionary
+                return dictionary;
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching report data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching report data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching report data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching report data.", ex);
+            }
+        }
+
+        public async Task<List<KeyValuePair<string, int>>> GetProposalsGeneratedByMonthCounts()
+        {
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                var sql = @"
+            WITH Months AS (
+                SELECT 'January' AS Month UNION ALL
+                SELECT 'February' UNION ALL
+                SELECT 'March' UNION ALL
+                SELECT 'April' UNION ALL
+                SELECT 'May' UNION ALL
+                SELECT 'June' UNION ALL
+                SELECT 'July' UNION ALL
+                SELECT 'August' UNION ALL
+                SELECT 'September' UNION ALL
+                SELECT 'October' UNION ALL
+                SELECT 'November' UNION ALL
+                SELECT 'December'
+            ),
+            Counts AS (
+                SELECT COUNT(*) as Count, FORMAT ([ProposalDate], 'MMMM') as Month
+                FROM [db_stg_erp].[dbo].[Proposals]
+                WHERE YEAR([ProposalDate]) = YEAR(GETDATE())
+                GROUP BY FORMAT ([ProposalDate], 'MMMM')
+            )
+            SELECT m.Month AS [Key], ISNULL(c.Count, 0) AS [Value]
+            FROM Months m
+            LEFT JOIN Counts c ON m.Month = c.Month
+            ORDER BY (CASE 
+                WHEN m.Month = 'January' THEN 1
+                WHEN m.Month = 'February' THEN 2
+                WHEN m.Month = 'March' THEN 3
+                WHEN m.Month = 'April' THEN 4
+                WHEN m.Month = 'May' THEN 5
+                WHEN m.Month = 'June' THEN 6
+                WHEN m.Month = 'July' THEN 7
+                WHEN m.Month = 'August' THEN 8
+                WHEN m.Month = 'September' THEN 9
+                WHEN m.Month = 'October' THEN 10
+                WHEN m.Month = 'November' THEN 11
+                WHEN m.Month = 'December' THEN 12
+            END)";
+                var results = await connection.QueryAsync<KeyValuePair<string, int>>(sql);
+
+                var list = results.ToList();
+
+                // Debug statement to print out the results
+                foreach (var pair in list)
+                {
+                    Debug.WriteLine($"Key: {pair.Key}, Value: {pair.Value}");
+                }
+
+                return list;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching report data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching report data.", ex);
+            }
+        }
+
+        public async Task<Dictionary<string, Dictionary<string, decimal>>> GetPmBareVsBillRate(List<string> positions,
+            DateTime? startDate, DateTime? endDate)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"
+        SELECT r.Position, SUM(r.BareRate) AS BareRate, SUM(r.BillRate) AS BillRate
+        FROM ProposalResources r
+        JOIN Proposals p ON r.ProposalId = p.Id
+        WHERE p.ProposalDate >= @StartDate
+        AND p.ProposalDate <= @EndDate
+        AND r.Position IN @Positions
+        GROUP BY r.Position";
+
+            var pmRates = await connection.QueryAsync<(string Position, decimal BareRate, decimal BillRate)>(
+                sql,
+                new { StartDate = startDate, EndDate = endDate, Positions = positions });
+
+            return pmRates.ToDictionary(
+                x => x.Position,
+                x => new Dictionary<string, decimal>
+                {
+                    { "BareRate", x.BareRate },
+                    { "BillRate", x.BillRate }
+                });
+        }
+
+        public async Task<Dictionary<string, decimal>> GetFilteredClientBudgets(List<string> clients,
+            DateTime? startDate, DateTime? endDate)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"
+        SELECT cv.Name AS ClientName, SUM(p.Total) AS TotalBudget
+        FROM Proposals p
+        JOIN ClientsVendors cv ON p.ClientId = cv.Id
+        WHERE p.ProposalDate >= @StartDate
+        AND p.ProposalDate <= @EndDate
+        AND cv.Name IN @Clients
+        GROUP BY cv.Name";
+
+            Console.WriteLine(
+                $"Executing query with parameters: StartDate = {startDate}, EndDate = {endDate}, Clients = {string.Join(", ", clients)}");
+
+            var clientBudgets = await connection.QueryAsync<(string ClientName, decimal TotalBudget)>(
+                sql,
+                new { StartDate = startDate, EndDate = endDate, Clients = clients });
+
+            // Convert result into a dictionary
+            var result = clientBudgets.ToDictionary(
+                x => x.ClientName,
+                x => x.TotalBudget
+            );
+
+            return result;
+        }
+
+        public async Task<Dictionary<string, List<Dictionary<string, decimal>>>> GetFilteredResourceCommitment(
+            List<string> resources, DateTime? startDate, DateTime? endDate)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            // SQL query to fetch resource commitment within the date range
+            var sql = @"
+        SELECT r.Name, SUM(r.Hours) AS TotalHours, p.ProjectName
+        FROM ProposalResources r
+        JOIN Proposals p ON r.ProposalId = p.Id
+        WHERE p.ProposalDate >= @StartDate
+        AND p.ProposalDate <= @EndDate
+        AND r.Name IN @Resources
+        GROUP BY r.Name, p.ProjectName";
+
+            Console.WriteLine(
+                $"Executing query with parameters: StartDate = {startDate}, EndDate = {endDate}, Resources = {string.Join(", ", resources)}");
+
+            var resourceData = await connection.QueryAsync<(string Name, decimal TotalHours, string ProjectName)>(
+                sql,
+                new { StartDate = startDate, EndDate = endDate, Resources = resources });
+
+            // Group by project name and aggregate data by resources
+            var result = resourceData
+                .GroupBy(x => x.ProjectName)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(x => new Dictionary<string, decimal> { { x.Name, x.TotalHours } }).ToList()
+                );
+
+            return result;
+        }
+
+        #endregion Proposal Dashboard Services
+
+        #region Proposal to Project Conversion
+
+        public async Task<int> CreateProjectFromProposal(Proposal proposal)
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var shortCode = proposal.Number.Replace("-", "");
+                var dateCreated = DateTime.Now;
+                var sql = $@"INSERT INTO Projects (
+                                Number,
+                                ProjectName,
+                                Description,
+                                Duration,
+                                ClientId,
+                                SectorCategoryId,
+                                ServiceTypeId,
+                                ProjectTypeId,
+                                ComplexityId,
+                                ImpactId,
+                                Total,
+                                EngPercentStd,
+                                PotentialHrRate,
+                                IndirectCost,
+                                IndirectCostComment,
+                                IndirectPercent,
+                                CreatedDate
+                            )
+                            VALUES (
+                                @Number,
+                                @ProjectName,
+                                @Description,
+                                @Duration,
+                                @ClientId,
+                                @SectorCategoryId,
+                                @ServiceTypeId,
+                                @ProjectTypeId,
+                                @ComplexityId,
+                                @ImpactId,
+                                @Total,
+                                @EngPercentStd,
+                                @PotentialHrRate,
+                                @IndirectCost,
+                                @IndirectCostComment,
+                                @IndirectPercent,
+                                @CreatedDate
+                            );
+                            SELECT CAST(SCOPE_IDENTITY() as int);";
+
+                // Execute the query and return the new project ID
+                var projectId = await connection.QuerySingleOrDefaultAsync<int>(sql, new
+                {
+                    Number = proposal.Number,
+                    ProjectName = proposal.ProjectName,
+                    Description = proposal.Description,
+                    Duration = proposal.Duration,
+                    ClientId = proposal.ClientId,
+                    SectorCategoryId = proposal.SectorCategoryId,
+                    ProjectTypeId = proposal.ProjectTypeId,
+                    ServiceTypeId = proposal.ServiceTypeId,
+                    ComplexityId = proposal.ComplexityId,
+                    ImpactId = proposal.ImpactId,
+                    Total = proposal.Total,
+                    EngPercentStd = proposal.EngPercentStd,
+                    PotentialHrRate = proposal.PotentialHrRate,
+                    IndirectCost = proposal.IndirectCost,
+                    IndirectCostComment = proposal.IndirectCostComment,
+                    IndirectPercent = proposal.IndirectPercentage,
+                    CreatedDate = dateCreated
+                });
+
+                return projectId;
+            }
+            catch (Exception ex)
+            {
+                throw new System.Data.DataException("An error occurred while fetching report data.", ex);
+            }
+        }
+
+        public async Task<int> CreateAEProjectFromProposal(Proposal proposal)
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var shortCode = proposal.Number.Replace("-", "");
+                var sql = $@"INSERT INTO Projects (
+                                Number,
+                                ProjectName,
+                                Description,
+                                Duration,
+                                ClientId,
+                                SectorCategoryId,
+                                ServiceTypeId,
+                                ProjectTypeId,
+                                ComplexityId,
+                                ImpactId,
+                                Total,
+                                ProjectBudget,
+                                EngPercentStd,
+                                EngDesignCost,
+                                IndirectCost,
+                                IndirectCostComment,
+                                IndirectPercent,
+                                ConstructionSupportCost,
+                                ConstructionSupportPercentage,
+                                ConstructionSupportComment,
+                            )
+                            VALUES (
+                                @Number,
+                                @ProjectName,
+                                @Description,
+                                @Duration,
+                                @ClientId,
+                                @SectorCategoryId,
+                                @ServiceTypeId,
+                                @ProjectTypeId,
+                                @ComplexityId,
+                                @ImpactId,
+                                @Total,
+                                @ProjectBudget,
+                                @EngPercentStd,
+                                @EngDesignCost,
+                                @IndirectCost,
+                                @IndirectCostComment,
+                                @IndirectPercent,
+                                @ConstructionSupportCost,
+                                @ConstructionSupportPercentage,
+                                @ConstructionSupportComment
+                            );
+                            SELECT CAST(SCOPE_IDENTITY() as int);";
+
+                // Execute the query and return the new project ID
+                var projectId = await connection.QuerySingleOrDefaultAsync<int>(sql, new
+                {
+                    Number = proposal.Number,
+                    ProjectName = proposal.ProjectName,
+                    Description = proposal.Description,
+                    Duration = proposal.Duration,
+                    ClientId = proposal.ClientId,
+                    SectorCategoryId = proposal.SectorCategoryId,
+                    ProjectTypeId = proposal.ProjectTypeId,
+                    ServiceTypeId = proposal.ServiceTypeId,
+                    ComplexityId = proposal.ComplexityId,
+                    ImpactId = proposal.ImpactId,
+                    Total = proposal.PotentialAECostTotal,
+                    ProjectBudget = proposal.Total,
+                    EngDesignCost = proposal.PotentialDesignFee,
+                    EngPercentStd = proposal.EngPercentStd,
+                    PotentialHrRate = proposal.PotentialHrRate,
+                    IndirectCost = proposal.IndirectCost,
+                    IndirectCostComment = proposal.IndirectCostComment,
+                    IndirectPercent = proposal.IndirectPercentage,
+                    ConstructionSupportCost = proposal.ConstructionSupportCost,
+                    ConstructionSupportPercentage = proposal.ConstructionSupportPercentage,
+                    ConstructionSupportComment = proposal.ConstructionSupportComment,
+                });
+
+                return projectId;
+            }
+            catch (Exception ex)
+            {
+                throw new System.Data.DataException("An error occurred while fetching report data.", ex);
+            }
+        }
+
+
+        public async Task<int> CreateProposalStatus(ProposalStatus proposalStatus)
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var sql = @"INSERT INTO ProposalStatusLogs (DateChanged, ProposalId, StatusId)
+						VALUES ( @DateChanged, @ProposalId, @StatusId);
+						SELECT CAST(SCOPE_IDENTITY() AS int);";
+                var proposalStatusId = await connection.QuerySingleOrDefaultAsync<int>(sql, proposalStatus);
+
+                return proposalStatusId;
+            }
+            catch (Exception ex)
+            {
+                throw new System.Data.DataException("An error occurred while creating the proposal status data.", ex);
+            }
+        }
+
+        public async Task<IEnumerable<StatusOption>> GetStatusOptions()
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var sql = @"SELECT * FROM ProposalStatuses;";
+
+                var statuOptions = await connection.QueryAsync<StatusOption>(sql);
+                return statuOptions;
+            }
+            catch (Exception ex)
+            {
+                throw new System.Data.DataException("An error occurred while fetching status options data.", ex);
+            }
+        }
+
+        public async Task<StatusOption> GetStatusOptionByName(string name)
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var sql = @"SELECT * FROM ProposalStatuses WHERE Name = @Name";
+                var statusOption = await connection.QuerySingleOrDefaultAsync<StatusOption>(sql, new { Name = name });
+                return statusOption;
+            }
+            catch (Exception ex)
+            {
+                throw new System.Data.DataException("An error occurred while fetching status options data.", ex);
+            }
+        }
+
+        public async Task<StatusOption> GetStatusOptionById(int Id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var sql = @"SELECT * FROM ProposalStatuses WHERE Id = @Id";
+                var statusOption = await connection.QuerySingleOrDefaultAsync<StatusOption>(sql, new { Id = Id });
+                return statusOption;
+            }
+            catch (Exception ex)
+            {
+                throw new System.Data.DataException("An error occurred while fetching status options data.", ex);
+            }
+        }
+
+        public async Task UpdateProposalStatus(int proposalId, int proposalStatusId)
+        {
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+                var sql = @"UPDATE Proposals
+							SET
+								ProposalStatusId = @ProposalStatusId
+							WHERE Id = @Id";
+                await connection.ExecuteAsync(sql, new { Id = proposalId, ProposalStatusId = proposalStatusId });
+            }
+            catch (Exception ex)
+            {
+                throw new System.Data.DataException("An error occurred while updating proposal status data.", ex);
+            }
+        }
+
+        #endregion Proposal to Project Conversion
+
+        #region Proposal Phases
+
+        public async Task<int> CreateProposalPhase(ProposalPhase proposalPhase)
+        {
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                var sql = @"INSERT INTO ProposalPhases (ServiceDeliverableId, ProposalId, Percentage, Cost)
+						VALUES ( @ServiceDeliverableId, @ProposalId, @Percentage, @Cost);
+						SELECT CAST(SCOPE_IDENTITY() AS int);";
+                var proposalServiceDeliverableId = await connection.QuerySingleOrDefaultAsync<int>(sql, proposalPhase);
+
+                return proposalServiceDeliverableId;
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching ProposalPhase data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching ProposalPhase data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching ProposalPhase data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching ProposalPhase data.", ex);
+            }
+            //throw new NotImplementedException();
+        }
+
+        public async Task<ProposalPhase> GetProposalPhaseById(int proposalServiceDeliverableId)
+        {
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                var sql = @"SELECT *
+							FROM ProposalPhases
+							WHERE Id = @Id";
+                var proposalPhase =
+                    await connection.QuerySingleOrDefaultAsync<ProposalPhase>(sql,
+                        new { Id = proposalServiceDeliverableId });
+
+                return proposalPhase;
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching ProposalPhase data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching ProposalPhase data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching ProposalPhase data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching ProposalPhase data.", ex);
+            }
+
+            //throw new NotImplementedException();
+        }
+
+        public async Task<List<ProposalPhase>> GetProposalPhasesByProposalId(int proposalId)
+        {
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                var sql = @"SELECT *
+							FROM ProposalPhases
+							WHERE ProposalId = @ProposalId";
+                var proposalPhase = await connection.QueryAsync<ProposalPhase>(sql, new { ProposalId = proposalId });
+
+                return proposalPhase.ToList();
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching ProposalPhase data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching ProposalPhase data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching ProposalPhase data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching ProposalPhase data.", ex);
+            }
+            //throw new NotImplementedException();
+        }
+
+        #endregion Proposal Phases
+
+        #region Billing Style
+
+        public async Task<BillingStyle> GetBillingStyleById(int billingStyleId)
+        {
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                var sql = @"SELECT * FROM BillingStyles WHERE Id = @Id";
+                var results =
+                    await connection.QuerySingleOrDefaultAsync<BillingStyle>(sql, new { Id = billingStyleId });
+
+                return results;
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Billing Styles data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Billing Styles data.", ex);
+            }
+        }
+
+        public async Task<IEnumerable<BillingStyle>> GetBillingStyles()
+        {
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                var sql = @"SELECT * FROM BillingStyles";
+                var results = await connection.QueryAsync<BillingStyle>(sql);
+
+                return results;
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Billing Styles data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Billing Styles data.", ex);
+            }
+        }
+
+        public async Task<BillingStyle> GetBillingStyleByName(string Name)
+        {
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                var sql = @"SELECT * FROM BillingStyles WHERE Name = @Name";
+                var results = await connection.QuerySingleOrDefaultAsync<BillingStyle>(sql, new { Name = Name });
+
+                return results;
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Billing Styles data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Billing Styles data.", ex);
+            }
+        }
+
+        public async Task<IEnumerable<Discipline>> GetAEDisciplines()
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var sql = @"SELECT * FROM AEDisciplines ORDER BY Name";
+
+                return await connection.QueryAsync<Discipline>(sql);
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Billing Styles data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Billing Styles data.", ex);
+            }
+        }
+
+        #endregion Billing Style
+
+        public async Task<IEnumerable<Discipline>> GetAESubDisciplinesByDisciplineId(int disciplineId)
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var sql = @"SELECT * FROM AESubDisciplines WHERE AEDisciplineId = @Id";
+                var results = await connection.QueryAsync<Discipline>(sql, new { Id = disciplineId });
+
+                return results;
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Billing Styles data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Billing Styles data.", ex);
+            }
+        }
+
+        public async Task<IEnumerable<Discipline>> GetAESubDisciplinesByDisciplineName(string AEDisciplineName)
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var sql = @"SELECT 
+								sd.Id AS SubDisciplineId,
+								sd.Name AS SubDisciplineName
+							FROM 
+								[db_stg_erp].[dbo].[AEDisciplines] d
+							JOIN 
+								[db_stg_erp].[dbo].[AESubDisciplines] sd
+							ON 
+								d.Id = sd.AEDisciplineId
+							WHERE 
+								d.Name = @Name;";
+                var results = await connection.QueryAsync<Discipline>(sql, new { Name = AEDisciplineName });
+
+                return results;
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Billing Styles data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Billing Styles data.", ex);
+            }
+        }
+
+        public async Task<int> CreateProposalSubDisciplinePercent(SubDisciplinePercent subDisciplinePercent)
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var sql = @"INSERT INTO ProposalSubDisciplinePercents
+								(Name, DisciplinePercentId, SubDisciplineId)
+							VALUES
+								(@Name, @DisciplinePercentId, @SubDisciplineId)
+							SELECT CAST(SCOPE_IDENTITY() as int);";
+                var results = await connection.QuerySingleOrDefaultAsync<int>(sql, new
+                {
+                    subDisciplinePercent.Name,
+                    subDisciplinePercent.DisciplinePercentId,
+                    subDisciplinePercent.SubDisciplineId
+                });
+
+                return results;
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Billing Styles data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Billing Styles data.", ex);
+            }
+        }
+
+        public async Task<int> CreateSubDisciplinePercentResources(ProjectResource subDisciplineResource)
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var sql = @"INSERT INTO ProposalResources
+								(Name, DisciplinePercentId, SubDisciplinePercentId, ProposalId, BareRate, Hours)
+							VALUES
+								(@Name, @DisciplinePercentId, @SubDisciplinePercentId, @ProposalId, @BareRate, @Hours)
+							SELECT CAST(SCOPE_IDENTITY() as int);";
+
+                var resourceId = await connection.QuerySingleOrDefaultAsync<int>(sql, new
+                {
+                    subDisciplineResource.Name,
+                    subDisciplineResource.DisciplinePercentId,
+                    subDisciplineResource.SubDisciplinePercentId,
+                    subDisciplineResource.ProposalId,
+                    subDisciplineResource.BareRate,
+                    subDisciplineResource.Hours
+                });
+
+                return resourceId;
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Billing Styles data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Billing Styles data.", ex);
+            }
+        }
+
+        public async Task<BillingStyle> GetBillingStyleByProposalId(int proposalId)
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var sql = @"SELECT 
+								p.Id AS ProposalId,
+								bs.Id AS BillingStyleId,
+								bs.Name AS Name
+							FROM 
+								Proposals p
+							LEFT JOIN 
+								ProposalBillingStyle pbs ON p.Id = pbs.ProposalId
+							LEFT JOIN 
+								BillingStyles bs ON pbs.BillingStyleId = bs.Id
+							WHERE 
+								p.Id = @ProposalId;";
+                var results =
+                    await connection.QuerySingleOrDefaultAsync<BillingStyle>(sql, new { ProposalId = proposalId });
+
+                return results;
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Billing Styles data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Billing Styles data.", ex);
+            }
+        }
+
+        public async Task<int> CreateProposalBilling(Proposal proposal)
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var sql = @"INSERT INTO ProposalBillingStyle
+								(ProposalId, BillingStyleId)
+							VALUES
+								(@ProposalId, @BillingStyleId)
+							SELECT CAST(SCOPE_IDENTITY() as int);";
+
+                var proposalBillingId = await connection.QuerySingleOrDefaultAsync<int>(sql, new
+                {
+                    ProposalId = proposal.Id,
+                    proposal.BillingStyleId
+                });
+
+                return proposalBillingId;
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Billing Styles data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Billing Styles data.", ex);
+            }
+        }
+
+        public async Task<IEnumerable<SubDisciplinePercent>> GetAESubDisciplinePercentsByDisciplinePercentId(
+            int disciplinePercentId)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            try
+            {
+                var sql =
+                    @"SELECT * FROM ProposalSubDisciplinePercents WHERE DisciplinePercentId = @DisciplinePercentId";
+                var results =
+                    await connection.QueryAsync<SubDisciplinePercent>(sql,
+                        new { DisciplinePercentId = disciplinePercentId });
+                return results;
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Billing Styles data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Billing Styles data.", ex);
+            }
+        }
+
+        public async Task<IEnumerable<ProjectResource>> GetAESubDisciplinePercentResourcesBySubDisciplinePercentId(
+            int subDisciplinePercentId)
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var sql = @"SELECT * FROM ProposalResources WHERE SubDisciplinePercentId = @SubDisciplinePercentId";
+                var results =
+                    await connection.QueryAsync<ProjectResource>(sql,
+                        new { SubDisciplinePercentId = subDisciplinePercentId });
+                return results;
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Billing Styles data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Billing Styles data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Billing Styles data.", ex);
+            }
+        }
+
+        public async Task<IEnumerable<AEDrawing>> GetDrawingsByDisciplineAndSubDiscipline(int disciplineId,
+            int? subDisciplineId)
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var query = @"
+            SELECT *
+            FROM AEDrawings
+            WHERE DisciplineId = @DisciplineId
+                AND (@SubDisciplineId IS NULL OR @SubDisciplineId = 0 OR SubDisciplineId = @SubDisciplineId)";
+
+                var drawings = await connection.QueryAsync<AEDrawing>(query,
+                    new { DisciplineId = disciplineId, SubDisciplineId = subDisciplineId });
+                return drawings;
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Drawing data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Drawing data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Drawing data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Drawing data.", ex);
+            }
+        }
+
+        public async Task<AEDrawing> GetAEDrawingDetails(int drawingId)
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var sql = @"
+						SELECT 
+							d.Id,
+							d.DisciplineId,
+							d.SubDisciplineId,
+							d.PageNumber,
+							d.Title
+						FROM 
+							AEDrawings d
+						WHERE 
+							d.Id = @DrawingId";
+                var results = await connection.QuerySingleOrDefaultAsync<AEDrawing>(sql, new { DrawingId = drawingId });
+                if (results == null)
+                {
+                    throw new Exception("Drawing Details Not Found");
+                }
+
+                return results;
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Drawing data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Drawing data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Drawing data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Drawing data.", ex);
+            }
+        }
+
+        public async Task<DisciplinePercent> GetDisciplinePercentById(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var sql = @"
+            SELECT dp.*, d.Name as DisciplineName
+            FROM DisciplinePercents dp
+            LEFT JOIN Disciplines d ON dp.DisciplineId = d.Id
+            WHERE dp.Id = @Id";
+                var results = await connection.QuerySingleOrDefaultAsync<DisciplinePercent>(sql, new { Id = id });
+                if (results == null)
+                {
+                    throw new Exception("Drawing Details Not Found");
+                }
+
+                return results;
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Drawing data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Drawing data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Drawing data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Drawing data.", ex);
+            }
+        }
+
+        public async Task UpdateDisciplinePercent(DisciplinePercent disciplinePercent)
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var sql = @"
+            UPDATE DisciplinePercents 
+            SET Name = @Name, ProjectId = @ProjectId, ProposalId = @ProposalId, DisciplineId = @DisciplineId, 
+                Percentage = @Percentage, PotentialDisciplineCost = @PotentialDisciplineCost, Hours = @Hours, HourlyRate = @HourlyRate, 
+                ArchitectCost = @ArchitectCost, DrafterCost = @DrafterCost, ArchitectTotalHours = @ArchitectTotalHours, 
+                DrafterTotalHours = @DrafterTotalHours, ArchitectPercent = @ArchitectPercent, DrafterPercent = @DrafterPercent, 
+                ArchitectRate = @ArchitectRate, DrafterRate = @DrafterRate
+            WHERE Id = @Id";
+                await connection.ExecuteAsync(sql, new { disciplinePercent });
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Drawing data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Drawing data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Drawing data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Drawing data.", ex);
+            }
+        }
+
+        public async Task<IEnumerable<SubDisciplinePercent>> GetSubDisciplinePercentsById(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var sql = @"
+            SELECT sdp.*, d.Name as DisciplineName
+            FROM SubDisciplinePercents sdp
+            LEFT JOIN Disciplines d ON sdp.SubDisciplineId = d.Id
+            WHERE sdp.DisciplinePercentId = @DisciplinePercentId";
+                var results =
+                    await connection.QuerySingleOrDefaultAsync<IEnumerable<SubDisciplinePercent>>(sql, new { Id = id });
+
+                if (results == null)
+                {
+                    throw new Exception("Drawing Details Not Found");
+                }
+
+                foreach (var sdp in results)
+                {
+                    sdp.Drawings = await connection.QuerySingleOrDefaultAsync<List<ProposalDisciplinePercentDrawing>>(
+                        "SELECT * FROM ProposalDisciplinePercentDrawings WHERE ProposalSubDisciplinePercentId = @Id",
+                        new { sdp.Id });
+                }
+
+                return results;
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Drawing data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Drawing data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Drawing data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Drawing data.", ex);
+            }
+        }
+
+        public async Task<SubDisciplinePercent> GetSubDisciplinePercentById(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var sql = @"
+            SELECT sdp.*, d.Name as DisciplineName
+            FROM SubDisciplinePercents sdp
+            LEFT JOIN Disciplines d ON sdp.SubDisciplineId = d.Id
+            WHERE sdp.Id = @Id";
+                var results = await connection.QuerySingleOrDefaultAsync<SubDisciplinePercent>(sql, new { Id = id });
+
+                if (results == null)
+                {
+                    throw new Exception("Drawing Details Not Found");
+                }
+
+                return results;
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Drawing data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Drawing data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Drawing data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Drawing data.", ex);
+            }
+        }
+
+        public async Task<int> CreateSubDisciplinePercent(SubDisciplinePercent subDisciplinePercent)
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var sql = @"
+            INSERT INTO SubDisciplinePercents (Name, DisciplinePercentId, SubDisciplineId)
+            VALUES (@Name, @DisciplinePercentId, @SubDisciplineId);
+            SELECT CAST(SCOPE_IDENTITY() as int)";
+                var results = await connection.QuerySingleOrDefaultAsync<int>(sql, subDisciplinePercent);
+
+                return results;
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Drawing data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Drawing data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Drawing data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Drawing data.", ex);
+            }
+        }
+
+        public async Task UpdateSubDisciplinePercent(SubDisciplinePercent subDisciplinePercent)
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var sql = @"
+            UPDATE SubDisciplinePercents 
+            SET Name = @Name, DisciplinePercentId = @DisciplinePercentId, SubDisciplineId = @SubDisciplineId
+            WHERE Id = @Id";
+                var results = await connection.ExecuteAsync(sql, subDisciplinePercent);
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Drawing data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Drawing data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Drawing data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Drawing data.", ex);
+            }
+        }
+
+        public async Task DeleteSubDisciplinePercent(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var sql = @"DELETE FROM SubDisciplinePercents WHERE Id = @Id";
+                var results = await connection.ExecuteAsync(sql, new { Id = id });
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Drawing data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Drawing data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Drawing data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Drawing data.", ex);
+            }
+        }
+
+        public async Task<IEnumerable<ProposalDisciplinePercentDrawing>> GetProposalDisciplinePercentDrawings(
+            int subDisciplinePercentId)
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var sql = @"
+            SELECT * FROM ProposalDisciplinePercentDrawings 
+            WHERE ProposalSubDisciplinePercentId = @SubDisciplinePercentId";
+                var results =
+                    await connection.QueryAsync<ProposalDisciplinePercentDrawing>(sql,
+                        new { Id = subDisciplinePercentId });
+                return results;
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Drawing data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Drawing data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Drawing data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Drawing data.", ex);
+            }
+        }
+
+        public async Task<ProposalDisciplinePercentDrawing> GetProposalDisciplinePercentDrawingById(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var sql = @"SELECT * FROM ProposalDisciplinePercentDrawings WHERE Id = @Id";
+                var results =
+                    await connection.QuerySingleOrDefaultAsync<ProposalDisciplinePercentDrawing>(sql, new { Id = id });
+                return results;
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Drawing data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Drawing data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Drawing data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Drawing data.", ex);
+            }
+        }
+
+        public async Task<int> CreateProposalDisciplinePercentDrawing(ProposalDisciplinePercentDrawing drawing)
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var sql = @"
+            INSERT INTO ProposalDisciplinePercentDrawings (DrawingId, ProposalDisciplinePercentId, ProposalSubDisciplinePercentId, DrawingCategory, DrawingPageNumber, DrawingDescription, DrawingCost)
+            VALUES (@DrawingId, @ProposalDisciplinePercentId, @ProposalSubDisciplinePercentId, @DrawingCategory, @DrawingPageNumber, @DrawingDescription, @DrawingCost);
+            SELECT CAST(SCOPE_IDENTITY() as int)";
+                var results = await connection.ExecuteScalarAsync<int>(sql, drawing);
+                return results;
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Drawing data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Drawing data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Drawing data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Drawing data.", ex);
+            }
+        }
+
+        public async Task UpdateProposalDisciplinePercentDrawing(ProposalDisciplinePercentDrawing drawing)
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var sql = @"
+            UPDATE ProposalDisciplinePercentDrawings 
+            SET DrawingId = @DrawingId, ProposalDisciplinePercentId = @ProposalDisciplinePercentId, 
+                ProposalSubDisciplinePercentId = @ProposalSubDisciplinePercentId, DrawingCategory = @DrawingCategory, 
+                DrawingPageNumber = @DrawingPageNumber, DrawingDescription = @DrawingDescription, DrawingCost = @DrawingCost
+            WHERE Id = @Id";
+                var results = await connection.ExecuteAsync(sql, drawing);
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Drawing data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Drawing data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Drawing data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Drawing data.", ex);
+            }
+        }
+
+        public async Task DeleteProposalDisciplinePercentDrawing(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            try
+            {
+                var sql = @"DELETE FROM ProposalDisciplinePercentDrawings WHERE Id = @Id";
+                var results = await connection.ExecuteAsync(sql, new { Id = id });
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Drawing data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Drawing data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Drawing data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Drawing data.", ex);
+            }
+        }
+
+
+        #region Proposal Deliverables
+
+        public async Task<int> CreateProposalDeliverable(ProjectDeliverable deliverable)
+        {
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                var sql = @"
+                INSERT INTO ProposalDeliverables 
+                    (ProposalId,Category,Name,Cost,IsSubconsultant,PlannedEndDate,PlannedStartDate,Percentage,SubconsultantPercentage,SubconsultantPercentageCost,TotalCost)
+                VALUES
+                    (@ProposalId,@Category,@Name,@Cost,@IsSubconsultant,@PlannedEndDate,@PlannedStartDate,@Percentage,@SubconsultantPercentage,@SubconsultantPercentageCost,@TotalCost);
+                SELECT CAST(SCOPE_IDENTITY() as int)";
+
+                var id = await connection.QuerySingleAsync<int>(sql, deliverable);
+
+                return id;
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Deliverable data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Drawing data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Deliverable data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Drawing data.", ex);
+            }
+        }
+
+        public async Task<List<ProjectDeliverable>> GetProposalDeliverablesByProposalId(int Id)
+        {
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+                var sql = @"SELECT * FROM ProposalDeliverables WHERE ProposalId = @Id";
+
+                var results = await connection.QueryAsync<ProjectDeliverable>(sql, new { Id = Id });
+                return results.ToList();
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Deliverable data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Drawing data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Deliverable data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Drawing data.", ex);
+            }
+        }
+
+        public async Task<IEnumerable<ServiceDeliverable>> GetAllServiceDeliverables()
+        {
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+                var sql = @"SELECT * FROM ServiceDeliverables";
+
+                var results = await connection.QueryAsync<ServiceDeliverable>(sql);
+                return results.ToList();
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Deliverable data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Drawing data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Deliverable data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Drawing data.", ex);
+            }
+        }
+
+        public async Task<Dictionary<string, decimal>> GetFilteredDeliverablesCost(List<string> deliverables,
+            DateTime? startDate, DateTime? endDate)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var sql = @"
+                SELECT d.Name, SUM(d.Cost) AS TotalCost
+                FROM ProposalDeliverables d
+                JOIN Proposals p ON d.ProposalId = p.Id
+                WHERE (@StartDate IS NULL OR p.ProposalDate >= @StartDate)
+                AND (@EndDate IS NULL OR p.ProposalDate <= @EndDate)
+                AND d.Name IN @Deliverables
+                GROUP BY d.Name";
+
+            var deliverablesCost = await connection.QueryAsync<(string Name, decimal TotalCost)>(
+                sql,
+                new { Deliverables = deliverables, StartDate = startDate, EndDate = endDate });
+
+            return deliverablesCost.ToDictionary(x => x.Name, x => x.TotalCost);
+        }
+
+        public async Task UpdateProposalDeliverable(ProjectDeliverable deliverable)
+        {
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+                var sql = @"UPDATE ProposalDeliverables 
+            SET ProposalId = @ProposalId, 
+                Category = @Category, 
+                Name = @Name, 
+                IsSubconsultant=@IsSubconsultant,
+                Cost = @Cost,
+                PlannedStartDate = @PlannedStartDate, 
+                PlannedEndDate = @PlannedEndDate, 
+                Percentage = @Percentage,
+                PlannedDurationHrs = @PlannedDurationHrs,
+                SubconsultantPercentage = @SubconsultantPercentage,
+                SubconsultantPercentageCost = @SubconsultantPercentageCost,
+                TotalCost = @TotalCost
+            WHERE Id = @Id;";
+
+
+                var results = await connection.ExecuteAsync(sql, new
+                {
+                    ProposalId = deliverable.ProposalId,
+                    Category = deliverable.Category,
+                    Name = deliverable.Name,
+                    Cost = deliverable.Cost,
+                    IsSubconsultant = deliverable.IsSubconsultant,
+                    PlannedStartDate = deliverable.PlannedStartDate,
+                    PlannedEndDate = deliverable.PlannedEndDate,
+                    Percentage = deliverable.Percentage,
+                    PlannedDurationHrs = deliverable.PlannedDurationHrs,
+                    Id = deliverable.Id,
+                    SubconsultantPercentage = deliverable.SubconsultantPercentage,
+                    SubconsultantPercentageCost = deliverable.SubconsultantPercentageCost,
+                    TotalCost = deliverable.TotalCost
+                });
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Deliverable data");
+                throw new System.Data.DataException("An SQL error occurred while fetching Deliverable data", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Deliverable data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Deliverable data.", ex);
+            }
+        }
+
+        public async Task UpdateProposalProjectId(int proposalId, int projectId)
+        {
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+                var sql = @"UPDATE Proposals 
+            SET ProjectId = @ProjectId 
+            WHERE Id = @Id;";
+
+
+                var results = await connection.ExecuteAsync(sql, new { ProjectId = projectId, Id = proposalId });
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Deliverable data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Drawing data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Deliverable data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Drawing data.", ex);
+            }
+        }
+
+        public async Task<Title> GetPositionNameById(int id)
+        {
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+                var sql = @"SELECT * FROM JobTitles WHERE Id = @Id;";
+                var results = await connection.QuerySingleOrDefaultAsync<Title>(sql, new { Id = id });
+                return results;
+            }
+            catch (SqlException ex)
+            {
+                // Catch SQL exceptions specifically
+                Debug.WriteLine("An SQL error occurred while fetching Deliverable data: " + ex.Message);
+                throw new System.Data.DataException("An SQL error occurred while fetching Drawing data.", ex);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while fetching Deliverable data: " + ex.Message);
+                throw new System.Data.DataException("An error occurred while fetching Drawing data.", ex);
+            }
+        }
+
+        #endregion Proposal Deliverables
+    }
+}
