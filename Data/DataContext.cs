@@ -33,6 +33,8 @@ namespace ErpApi.Data
         public DbSet<ProjectInvoiceDetail> ProjectInvoiceDetails { get; set; }
         public DbSet<ProjectSubConsultant> ProjectSubConsultants { get; set; }
         public DbSet<ProjectResource> ProjectResources { get; set; }
+        public DbSet<ServiceDeliverable> ServiceDeliverables { get; set; }
+        public DbSet<ServiceDeliverableCategory> ServiceDeliverableCategories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -218,6 +220,11 @@ namespace ErpApi.Data
                 .WithMany()
                 .HasForeignKey(d => d.ProjectId)
                 .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<ServiceDeliverable>()
+                .HasOne(sd => sd.ServiceDeliverableCategory)
+                .WithMany()
+                .HasForeignKey(sd => sd.ServiceDeliverableCategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
