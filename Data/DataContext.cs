@@ -16,6 +16,7 @@ namespace ErpApi.Data
         // DbSet properties for each table/entity
         public DbSet<Proposal> Proposals { get; set; }
         public DbSet<ProposalType> ProposalTypes { get; set; }
+        public DbSet<ProposalPhase> ProposalPhases { get; set; }
         public DbSet<ProjectType> ProjectTypes { get; set; }
         public DbSet<ServiceType> ServiceTypes { get; set; }
         public DbSet<Complexity> Complexities { get; set; }
@@ -35,6 +36,8 @@ namespace ErpApi.Data
         public DbSet<ProjectResource> ProjectResources { get; set; }
         public DbSet<ServiceDeliverable> ServiceDeliverables { get; set; }
         public DbSet<ServiceDeliverableCategory> ServiceDeliverableCategories { get; set; }
+        public DbSet<ProposalDisciplinePercentDrawing> ProposalDisciplinePercentDrawings { get; set; }
+        public DbSet<SubDisciplinePercent> SubDisciplinePercents { get; internal set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -56,6 +59,23 @@ namespace ErpApi.Data
                 .WithMany()
                 .HasForeignKey(p => p.ProposalTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ProposalPhase>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Percentage).HasColumnType("decimal(18,2)");
+            entity.Property(e => e.Cost).HasColumnType("decimal(18,2)");
+
+            entity.HasOne(e => e.Proposal)
+                  .WithMany(p => p.ProposalPhases)
+                  .HasForeignKey(e => e.ProposalId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.ServiceDeliverable)
+                  .WithMany()
+                  .HasForeignKey(e => e.ServiceDeliverableId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
 
             modelBuilder.Entity<Proposal>()
                 .HasOne(p => p.ProjectType)
@@ -92,6 +112,44 @@ namespace ErpApi.Data
                 .WithMany()
                 .HasForeignKey(p => p.ProposalStatusId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure ProposalPhase entity
+            modelBuilder.Entity<ProposalPhase>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Percentage).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.Cost).HasColumnType("decimal(18,2)");
+
+                entity.HasOne(e => e.Proposal)
+                      .WithMany(p => p.ProposalPhases)
+                      .HasForeignKey(e => e.ProposalId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.ServiceDeliverable)
+                      .WithMany()
+                      .HasForeignKey(e => e.ServiceDeliverableId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Configure ProposalDisciplinePercentDrawing entity
+            modelBuilder.Entity<ProposalDisciplinePercentDrawing>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.DrawingCategory).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.DrawingPageNumber).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.DrawingDescription).HasMaxLength(500);
+                entity.Property(e => e.DrawingCost).HasColumnType("decimal(18,2)");
+
+                entity.HasOne(e => e.AEDrawing)
+                      .WithMany()
+                      .HasForeignKey(e => e.AEDrawingId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.SubDisciplinePercent)
+                      .WithMany(s => s.Drawings)
+                      .HasForeignKey(e => e.SubDisciplinePercentId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
 
             // Project relationships
             modelBuilder.Entity<Project>()
