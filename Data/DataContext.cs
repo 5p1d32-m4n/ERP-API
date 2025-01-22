@@ -14,30 +14,31 @@ namespace ErpApi.Data
         }
 
         // DbSet properties for each table/entity
-        public DbSet<Proposal> Proposals { get; set; }
-        public DbSet<ProposalType> ProposalTypes { get; set; }
-        public DbSet<ProposalPhase> ProposalPhases { get; set; }
-        public DbSet<ProjectType> ProjectTypes { get; set; }
-        public DbSet<ServiceType> ServiceTypes { get; set; }
-        public DbSet<Complexity> Complexities { get; set; }
-        public DbSet<Impact> Impacts { get; set; }
-        public DbSet<Sector> Sectors { get; set; }
-        public DbSet<SectorCategory> SectorCategories { get; set; }
-        public DbSet<ProposalStatus> ProposalStatuses { get; set; }
-        public DbSet<StatusOption> StatusOptions { get; set; }
-        public DbSet<ProposalFormat> ProposalFormats { get; set; }
-        public DbSet<ProjectResource> ProposalResources { get; set; }
-        public DbSet<AdditionalCost> ProposalAdditionalCosts { get; set; }
-        public DbSet<Project> Projects { get; set; }
-        public DbSet<ProjectDeliverable> ProjectDeliverables { get; set; }
-        public DbSet<ProjectInvoice> ProjectInvoices { get; set; }
-        public DbSet<ProjectInvoiceDetail> ProjectInvoiceDetails { get; set; }
-        public DbSet<ProjectSubConsultant> ProjectSubConsultants { get; set; }
-        public DbSet<ProjectResource> ProjectResources { get; set; }
-        public DbSet<ServiceDeliverable> ServiceDeliverables { get; set; }
-        public DbSet<ServiceDeliverableCategory> ServiceDeliverableCategories { get; set; }
-        public DbSet<ProposalDisciplinePercentDrawing> ProposalDisciplinePercentDrawings { get; set; }
-        public DbSet<SubDisciplinePercent> SubDisciplinePercents { get; internal set; }
+        public DbSet<Proposal> Proposals { get; set; } = null;
+        public DbSet<ProposalType> ProposalTypes { get; set; }= null;
+        public DbSet<ProposalPhase> ProposalPhases { get; set; }= null;
+        public DbSet<ProjectType> ProjectTypes { get; set; }= null;
+        public DbSet<ServiceType> ServiceTypes { get; set; }= null;
+        public DbSet<Complexity> Complexities { get; set; }= null;
+        public DbSet<Impact> Impacts { get; set; }= null;
+        public DbSet<Sector> Sectors { get; set; }= null;
+        public DbSet<SectorCategory> SectorCategories { get; set; }= null;
+        public DbSet<ProposalStatus> ProposalStatuses { get; set; }= null;
+        public DbSet<StatusOption> StatusOptions { get; set; }= null;
+        public DbSet<ProposalFormat> ProposalFormats { get; set; }= null;
+        public DbSet<ProjectResource> ProposalResources { get; set; }= null;
+        public DbSet<AdditionalCost> ProposalAdditionalCosts { get; set; }= null;
+        public DbSet<Project> Projects { get; set; }= null;
+        public DbSet<ProjectDeliverable> ProjectDeliverables { get; set; }= null;
+        public DbSet<ProjectInvoice> ProjectInvoices { get; set; }= null;
+        public DbSet<ProjectInvoiceDetail> ProjectInvoiceDetails { get; set; }= null;
+        public DbSet<ProjectSubConsultant> ProjectSubConsultants { get; set; }= null;
+        public DbSet<ProjectResource> ProjectResources { get; set; }= null;
+        public DbSet<ServiceDeliverable> ServiceDeliverables { get; set; }= null;
+        public DbSet<ServiceDeliverableCategory> ServiceDeliverableCategories { get; set; }= null;
+        public DbSet<ProposalDisciplinePercentDrawing> ProposalDisciplinePercentDrawings { get; set; }= null;
+        public DbSet<SubDisciplinePercent> SubDisciplinePercents { get; internal set; }= null;
+        public DbSet<ClientVendor> ClientVendors { get; set; }= null;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

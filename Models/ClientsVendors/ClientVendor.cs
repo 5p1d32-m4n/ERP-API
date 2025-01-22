@@ -28,40 +28,40 @@ namespace ErpApi.Models.ClientsVendors
 		public int TownId { get; set; }
 
 		//[Required(ErrorMessage = "This field is required")]
-		public string State { get; set; }
+		public string? State { get; set; }
 
-		public string Zipcode { get; set; }
+		public string? Zipcode { get; set; }
 
 		//[Required(ErrorMessage = "This field is required")]
 		[RegularExpression(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", ErrorMessage = "Invalid email format")]
-		public string Email { get; set; }
+		public string? Email { get; set; }
 
         public string Description { get; set; }
 
-		public string Website { get; set; } 
+		public string? Website { get; set; } 
 
-        public string Specialty { get; set; }
+        public string? Specialty { get; set; }
         
-        public string FaxNumber { get; set; }
+        public string? FaxNumber { get; set; }
 
         public string ContactOne { get; set; }
 
         [Phone]
         public string ContactOnePhone { get; set; }
 
-        public string ContactTwo { get; set; }
+        public string? ContactTwo { get; set; }
 
         [Phone]
-        public string ContactTwoPhone { get; set; }
+        public string? ContactTwoPhone { get; set; }
 
         public Town town { get; set; }
 
-		public string TownName { get; set; }
+		public string? TownName { get; set; }
 
 		[NotMapped]
-		public IFormFile ImageFile { get; set; }
+		public IFormFile? ImageFile { get; set; }
 
-		public string ImageName { get; set; }
+		public string? ImageName { get; set; }
 
 		public string GetImageUrl()
 		{
