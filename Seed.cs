@@ -29,7 +29,22 @@ namespace ErpApi.Data
                 return;   // DB has been seeded
             }
 
-            // Insert related entities first
+            var towns = new Town[]
+            {
+                new Town { Name = "Town1" },
+                new Town { Name = "Town2" }
+            };
+            _context.Towns.AddRange(towns);
+            _context.SaveChanges();
+
+            var projectTypes = new ProjectType[]
+            {
+                new ProjectType { Name = "ProjectType1" },
+                new ProjectType { Name = "ProjectType2" }
+            };
+            _context.ProjectTypes.AddRange(projectTypes);
+            _context.SaveChanges();
+
             var clients = new ClientVendor[]
             {
                 new ClientVendor { 
@@ -40,7 +55,10 @@ namespace ErpApi.Data
                     Name = "Client1",
                     ContactOne = "Contact 1",
                     ContactOnePhone = "(555) 555-5555",
-                    Description = "Description 1"
+                    Description = "Description 1",
+                    ModifiedBy = "Seed",
+                    TownId = towns[0].Id,
+                    CreatedBy = "Seed"
                     },
                 new ClientVendor {
                     ClientVendorId = "CV002",
@@ -49,10 +67,12 @@ namespace ErpApi.Data
                     Name = "Client2",
                     ContactOne = "Contact 1",
                     ContactOnePhone = "(555) 555-5555",
-                    Description = "Description 2"
+                    Description = "Description 2",
+                    ModifiedBy = "Seed",
+                    TownId = towns[1].Id,
+                    CreatedBy = "Seed"
                     }
             };
-
             _context.ClientVendors.AddRange(clients);
             _context.SaveChanges();
 
@@ -112,34 +132,46 @@ namespace ErpApi.Data
             };
             _context.StatusOptions.AddRange(statusOptions);
             _context.SaveChanges();
+            
+            var proposalFormats = new ProposalFormat[]
+            {
+                new ProposalFormat { Name = "Format1", ServiceTypeId = serviceTypes[0].Id },
+                new ProposalFormat { Name = "Format2", ServiceTypeId = serviceTypes[1].Id }
+            };
+            _context.ProposalFormats.AddRange(proposalFormats);
+            _context.SaveChanges();
 
             // Insert proposals with valid foreign key references
             var proposals = new Proposal[]
             {
                 new Proposal
                 {
-                    // Initialize your Proposal properties here
                     ProjectName = "SeedProject1",
                     Number = "001",
                     ClientId = clients[0].Id,
                     ServiceTypeId = serviceTypes[0].Id,
                     ProposalTypeId = proposalTypes[0].Id,
+                    ProjectTypeId = projectTypes[0].Id,
                     ComplexityId = complexities[0].Id,
                     ImpactId = impacts[0].Id,
                     SectorCategoryId = sectorCategories[0].Id,
+                    SectorId = sectors[0].Id,
+                    ProposalFormatId = proposalFormats[0].Id,
                     CreatedBy = "Seed",
                 },
                 new Proposal
                 {
-                    // Initialize your Proposal properties here
                     ProjectName = "SeedProject2",
                     Number = "002",
                     ClientId = clients[1].Id,
                     ServiceTypeId = serviceTypes[1].Id,
                     ProposalTypeId = proposalTypes[1].Id,
+                    ProjectTypeId = projectTypes[1].Id,
                     ComplexityId = complexities[1].Id,
                     ImpactId = impacts[1].Id,
                     SectorCategoryId = sectorCategories[1].Id,
+                    SectorId = sectors[1].Id,
+                    ProposalFormatId = proposalFormats[1].Id,
                     CreatedBy = "Seed",
                 }
             };
@@ -148,8 +180,8 @@ namespace ErpApi.Data
 
             var proposalStatuses = new ProposalStatus[]
             {
-                new ProposalStatus { StatusString = "Status1", ProposalId = proposals[0].Id },
-                new ProposalStatus { StatusString = "Status2", ProposalId = proposals[1].Id }
+                new ProposalStatus { DateChanged = DateTime.Now, ProposalId = proposals[0].Id, StatusOptionId = statusOptions[0].Id, StatusString = "Status1" },
+                new ProposalStatus { DateChanged = DateTime.Now, ProposalId = proposals[1].Id, StatusOptionId = statusOptions[1].Id, StatusString = "Status2" }
             };
             _context.ProposalStatuses.AddRange(proposalStatuses);
             _context.SaveChanges();

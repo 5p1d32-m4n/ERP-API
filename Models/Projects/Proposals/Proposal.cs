@@ -31,7 +31,6 @@ namespace ErpApi.Models.Projects.Proposals
         //from Proposal Module
         [ForeignKey(nameof(ProposalStatus))]
         public int ProposalStatusId { get; set; }
-        public ProposalStatus ProposalStatus { get; set; }
         [ForeignKey(nameof(ProposalType))]
         public int ProposalTypeId { get; set; }
         public ProposalType ProposalType { get; set; }
@@ -92,6 +91,7 @@ namespace ErpApi.Models.Projects.Proposals
         public decimal PotentialHrRate { get; set; } = 0.0M;
         public decimal PotentialAECostTotal { get; set; } = 0.0M;
 
+        public List<ProposalStatus> ProposalStatuses { get; set; }
 
 
         // Project Management Proposal

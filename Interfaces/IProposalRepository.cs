@@ -35,11 +35,11 @@ public interface IProposalRepository
         Task<IEnumerable<ProposalPhase>> GetProposalPhasesAsync();
 
         Task<IEnumerable<Proposal>> GetProposalsByClientIdAsync(int clientId);
-        Task<IEnumerable<Proposal>> GetProposalsByStatusAsync(string status);
+        // Task<IEnumerable<Proposal>> GetProposalsByStatusAsync(string status);
         Task<IEnumerable<Proposal>> GetProposalsByServiceTypeAsync(int serviceTypeId);
         Task<IEnumerable<Proposal>> GetProposalsBySectorAsync(int sectorId);
 
-        Task<int> GetProposalCountByStatusAsync(string status);
+        // Task<int> GetProposalCountByStatusAsync(string status);
         Task<decimal> GetTotalProposalCostAsync(int proposalId);
         Task<Dictionary<string, int>> GetProposalCountByTypeAsync();
 }

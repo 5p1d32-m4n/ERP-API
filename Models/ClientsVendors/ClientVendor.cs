@@ -22,7 +22,7 @@ namespace ErpApi.Models.ClientsVendors
         
         public string AddressLine { get; set; }
 
-        public string AddressLine2 { get; set; }
+        public string? AddressLine2 { get; set; }
 
 		//[Required(ErrorMessage = "This field is required")]
 		public int TownId { get; set; }
@@ -54,7 +54,7 @@ namespace ErpApi.Models.ClientsVendors
         [Phone]
         public string? ContactTwoPhone { get; set; }
 
-        public Town town { get; set; }
+        public Town Town { get; set; }
 
 		public string? TownName { get; set; }
 

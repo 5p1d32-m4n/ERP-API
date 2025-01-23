@@ -167,10 +167,10 @@ public class ProposalRepository : IProposalRepository
             return await _context.Proposals.Where(p => p.ClientId == clientId).ToListAsync();
         }
 
-        public async Task<IEnumerable<Proposal>> GetProposalsByStatusAsync(string status)
-        {
-            return await _context.Proposals.Where(p => p.ProposalStatus.StatusString == status).ToListAsync();
-        }
+        // public async Task<IEnumerable<Proposal>> GetProposalsByStatusAsync(string status)
+        // {
+        //     return await _context.Proposals.Where(p => p.ProposalStatus.StatusString == status).ToListAsync();
+        // }
 
         public async Task<IEnumerable<Proposal>> GetProposalsByServiceTypeAsync(int serviceTypeId)
         {
@@ -182,10 +182,10 @@ public class ProposalRepository : IProposalRepository
             return await _context.Proposals.Where(p => p.SectorId == sectorId).ToListAsync();
         }
 
-        public async Task<int> GetProposalCountByStatusAsync(string status)
-        {
-            return await _context.Proposals.CountAsync(p => p.ProposalStatus.StatusString == status);
-        }
+        // public async Task<int> GetProposalCountByStatusAsync(string status)
+        // {
+        //     return await _context.Proposals.CountAsync(p => p.ProposalStatus.StatusString == status);
+        // }
 
         public async Task<decimal> GetTotalProposalCostAsync(int proposalId)
         {

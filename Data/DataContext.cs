@@ -39,6 +39,7 @@ namespace ErpApi.Data
         public DbSet<ProposalDisciplinePercentDrawing> ProposalDisciplinePercentDrawings { get; set; }= null;
         public DbSet<SubDisciplinePercent> SubDisciplinePercents { get; internal set; }= null;
         public DbSet<ClientVendor> ClientVendors { get; set; }= null;
+        public DbSet<Town> Towns { get; set; }= null;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -60,23 +61,6 @@ namespace ErpApi.Data
                 .WithMany()
                 .HasForeignKey(p => p.ProposalTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<ProposalPhase>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Percentage).HasColumnType("decimal(18,2)");
-            entity.Property(e => e.Cost).HasColumnType("decimal(18,2)");
-
-            entity.HasOne(e => e.Proposal)
-                  .WithMany(p => p.ProposalPhases)
-                  .HasForeignKey(e => e.ProposalId)
-                  .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasOne(e => e.ServiceDeliverable)
-                  .WithMany()
-                  .HasForeignKey(e => e.ServiceDeliverableId)
-                  .OnDelete(DeleteBehavior.Restrict);
-        });
 
             modelBuilder.Entity<Proposal>()
                 .HasOne(p => p.ProjectType)
@@ -103,15 +87,15 @@ namespace ErpApi.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Proposal>()
-                .HasOne(p => p.ProposalFormat)
+                .HasOne(p => p.Sector)
                 .WithMany()
-                .HasForeignKey(p => p.ProposalFormatId)
+                .HasForeignKey(p => p.SectorId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Proposal>()
-                .HasOne(p => p.ProposalStatus)
+                .HasOne(p => p.ProposalFormat)
                 .WithMany()
-                .HasForeignKey(p => p.ProposalStatusId)
+                .HasForeignKey(p => p.ProposalFormatId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Configure ProposalPhase entity
@@ -279,11 +263,32 @@ namespace ErpApi.Data
                 .WithMany()
                 .HasForeignKey(d => d.ProjectId)
                 .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<ServiceDeliverable>()
                 .HasOne(sd => sd.ServiceDeliverableCategory)
                 .WithMany()
                 .HasForeignKey(sd => sd.ServiceDeliverableCategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // ClientVendor relationships
+            modelBuilder.Entity<ClientVendor>()
+                .HasOne(cv => cv.Town)
+                .WithMany()
+                .HasForeignKey(cv => cv.TownId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // ProposalStatus relationships
+            modelBuilder.Entity<ProposalStatus>()
+                .HasOne(ps => ps.Proposal)
+                .WithMany(p => p.ProposalStatuses)
+                .HasForeignKey(ps => ps.ProposalId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ProposalStatus>()
+                .HasOne(ps => ps.StatusOption)
+                .WithMany()
+                .HasForeignKey(ps => ps.StatusOptionId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
