@@ -6,30 +6,30 @@ function App() {
 
   const fetchProposals = async () => {
     try {
-      const response = await fetch('/api/proposal')
+      const response = await fetch('/api/proposal') // Use the proxied path
       const data = await response.json()
       setProposals(data);
     } catch (error) {
-      console.error(error)
+      console.error('Error fetching proposals:', error)
     }
   }
 
   return (
     <>
-    <div className="container">
-      <button onClick={fetchProposals}>Fetch Proposals</button>
-      <div className="proposals-container">
-        {proposals.length > 0 ? (
-          <ul>
-            {proposals.map((proposal) => (
-              <li key={proposal.id}>{proposal.projectName}</li>
-            ))}
-          </ul>
-        ):(
-          <p>No proposals found.</p>
-        )}
+      <div className="container">
+        <button onClick={fetchProposals}>Fetch Proposals</button>
+        <div className="proposals-container">
+          {proposals.length > 0 ? (
+            <ul>
+              {proposals.map((proposal) => (
+                <li key={proposal.id}>{proposal.projectName}</li>
+              ))}
+            </ul>
+          ) : (
+            <p>No proposals found.</p>
+          )}
+        </div>
       </div>
-    </div>
     </>
   )
 }
