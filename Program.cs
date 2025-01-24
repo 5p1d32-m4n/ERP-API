@@ -21,8 +21,21 @@ builder.Services.AddDbContext<ProposalDbContext>(options =>
 
 builder.Services.AddTransient<Seed>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyMethod()
+              .AllowAnyHeader());
+});
+
+
 var app = builder.Build();
 
+// CORS
+app.UseCors("AllowFrontend");
+
+// Seed
 if (args.Length == 1 && args[0].ToLower() == "seeddata")
     SeedData(app);
 
