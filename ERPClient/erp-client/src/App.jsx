@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import './App.css'
-import Header from './Header'
+import NavBar from './NavBar'
 
 function App() {
   const [proposals, setProposals] = useState([])
@@ -17,21 +17,7 @@ function App() {
 
   return (
     <>
-    <Header />
-      <div className="container">
-        <button onClick={fetchProposals}>Fetch Proposals</button>
-        <div className="proposals-container">
-          {proposals.length > 0 ? (
-            <ul>
-              {proposals.map((proposal) => (
-                <li key={proposal.id}>{proposal.projectName}</li>
-              ))}
-            </ul>
-          ) : (
-            <p>No proposals found.</p>
-          )}
-        </div>
-      </div>
+      <NavBar />
     </>
   )
 }
