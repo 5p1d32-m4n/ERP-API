@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './App.css'
+import Header from './Header'
 
 function App() {
   const [proposals, setProposals] = useState([])
@@ -16,6 +17,7 @@ function App() {
 
   return (
     <>
+    <Header />
       <div className="container">
         <button onClick={fetchProposals}>Fetch Proposals</button>
         <div className="proposals-container">
