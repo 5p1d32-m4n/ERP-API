@@ -5,3 +5,5 @@
 /.vs
 /Migrations
 output.txt
+appsettings.Development.json
+appsettings.json
