@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import './App.css'
-import NavBar from './NavBar'
+import NavBar from './components/NavBar'
 
 function App() {
   const [proposals, setProposals] = useState([])
